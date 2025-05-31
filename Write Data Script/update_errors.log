@@ -1,11 +1,3 @@
-UPDATE ERRORS LOG
-================
-
-Repository: TemporalDistoriton/DropfleetTTS
-Image path format: https://raw.githubusercontent.com/TemporalDistoriton/DropfleetTTS/main
-Use raw=true: False
-================
-
-ERROR: CardFrontImage not found for "Granite" Halsey - Washington in UCM faction (tried path: UCM/_Granite_ Halsey - Washington_CardFrontImage.png)
-ERROR: ModelImage not found for "Granite" Halsey - Washington in UCM faction (tried path: UCM/_Granite_ Halsey - Washington_ModelImage.png)
-SKIPPING: No images found for "Granite" Halsey - Washington in UCM faction
+Errors:
+Missing upgrade image: Lvl 1: Ardent
+Missing upgrade image: Lvl 3: Accumulator

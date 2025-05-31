@@ -4,6 +4,7 @@ import json
 import requests
 import pandas as pd
 from urllib.parse import quote
+import argparse  # Added for command line arguments
 
 # GitHub repository information
 GITHUB_REPO = "TemporalDistoriton/DropfleetTTS"
@@ -43,14 +44,27 @@ PARAMETERS = [
     # Removed 'faction' from here as we're determining it from containers
 ]
 
+# Parameters for upgrades
+UPGRADE_PARAMETERS = [
+    'name',
+    'cardImage',  # Common parameter for upgrade cards
+    'points'
+]
+
+# Script modes
+MODE_SHIPS_ONLY = "ships"
+MODE_UPGRADES_ONLY = "upgrades"
+MODE_BOTH = "both"
+
 # Flag to actually save changes (set to False for testing)
 SAVE_CHANGES = True
 
 # Initialize error log
 error_log = []
 
-# List to store extracted data for Excel
+# Lists to store extracted data for Excel
 extracted_data = []
+extracted_upgrade_data = []
 
 def extract_parameter(content, param_name):
     """
@@ -60,7 +74,7 @@ def extract_parameter(content, param_name):
     if param_name in ['baseScale', 'health', 'sig', 'points']:
         # Number parameters (may have local or direct assignment)
         pattern = rf'(?:local\s+{param_name}\s*=\s*|{param_name}\s*=\s*)([0-9.]+)'
-    elif param_name in ['modelImage', 'cardFrontImage']:
+    elif param_name in ['modelImage', 'cardFrontImage', 'cardImage']:
         # URL parameters (often within quotes)
         pattern = rf"(?:local\s+{param_name}\s*=\s*|{param_name}\s*=\s*)['\"](https?://[^'\"]+)['\"]"
     elif param_name == 'name':
@@ -125,6 +139,29 @@ def is_ship_card_script(content):
     # If at least 3 indicators are found, consider it a ship card script
     return matches >= 3
 
+def is_upgrade_card_script(content):
+    """
+    Check if the content contains an upgrade card script based on key indicators
+    """
+    # Look for specific indicators in upgrade card scripts
+    indicators = [
+        "rebuildUI()",
+        "cardImage",
+        "onLoad",
+        "points",
+        "onSave()"
+    ]
+    
+    # Count how many indicators are present
+    matches = sum(1 for indicator in indicators if indicator in content)
+    
+    # If upgrade has cardImage but no modelImage, it's probably an upgrade
+    has_card_image = "cardImage" in content or "CardImage" in content
+    no_model_image = "modelImage" not in content and "ModelImage" not in content
+    
+    # If at least 3 indicators are found AND it has cardImage but no modelImage, consider it an upgrade card script
+    return (matches >= 3 and has_card_image and no_model_image)
+
 def download_image(url, destination):
     """
     Download an image from URL and save it to the destination
@@ -159,25 +196,29 @@ def sanitize_filename(name):
     # Remove leading/trailing spaces
     return name.strip()
 
-def get_github_path(faction, ship_name, image_type):
+def get_github_path(faction, item_name, image_type=None, is_upgrade=False):
     """
     Get the appropriate GitHub path based on the configured format
     """
-    sanitized_name = sanitize_filename(ship_name)
+    sanitized_name = sanitize_filename(item_name)
     
-    # Use faction folder format
-    return f"{faction}/{sanitized_name}_{image_type}.png"
+    if is_upgrade:
+        # For upgrades, use the Upgrades subfolder
+        return f"{faction}/Upgrades/{sanitized_name}.png"
+    else:
+        # For ships, use previous format with image type
+        return f"{faction}/{sanitized_name}_{image_type}.png"
 
-def check_image_exists(faction, ship_name, image_type):
+def check_image_exists(faction, item_name, image_type=None, is_upgrade=False):
     """
     Check if an image exists in the GitHub repository
     First checks using the API, then tries a direct HTTP request if needed
     """
     # Get the path for the image
-    path = get_github_path(faction, ship_name, image_type)
+    path = get_github_path(faction, item_name, image_type, is_upgrade)
     
     # URL encode the path for API request
-    encoded_path = quote(f"{faction}/{sanitized_filename(ship_name)}_{image_type}.png")
+    encoded_path = quote(path)
     api_url = f"{GITHUB_API_BASE_URL}/{encoded_path}"
     
     try:
@@ -187,7 +228,7 @@ def check_image_exists(faction, ship_name, image_type):
             return True, path
         
         # If API fails, try a direct HTTP request to the raw URL
-        raw_url = get_github_image_url(faction, ship_name, image_type)
+        raw_url = get_github_image_url(faction, item_name, image_type, is_upgrade)
         direct_response = requests.head(raw_url)
         if direct_response.status_code == 200:
             return True, path
@@ -205,16 +246,24 @@ def sanitized_filename(name):
     sanitized = sanitize_filename(name)
     return sanitized
 
-def get_github_image_url(faction, ship_name, image_type):
+def get_github_image_url(faction, item_name, image_type=None, is_upgrade=False):
     """
     Get the raw GitHub URL for an image
     """
     # Get the path for the image
-    sanitized_name = sanitized_filename(ship_name)
-    filename = f"{sanitized_name}_{image_type}.png"
+    sanitized_name = sanitized_filename(item_name)
     
-    # URL encode the path components for the raw URL
-    encoded_path = f"{faction}/{quote(filename)}"
+    if is_upgrade:
+        # For upgrades
+        filename = f"{sanitized_name}.png"
+        # URL encode the path components for the raw URL
+        encoded_path = f"{faction}/Upgrades/{quote(filename)}"
+    else:
+        # For ships
+        filename = f"{sanitized_name}_{image_type}.png"
+        # URL encode the path components for the raw URL
+        encoded_path = f"{faction}/{quote(filename)}"
+    
     url = f"{GITHUB_RAW_BASE_URL}/{encoded_path}"
     
     # Add ?raw=true if required
@@ -276,6 +325,33 @@ def test_repository_structure(faction="Neutral", ship_name="M-Type Barge"):
     
     print("Could not detect working URL format automatically.")
     return False
+
+def test_upgrade_structure():
+    """
+    Test the upgrade repository structure with the example URL provided
+    """
+    print("Testing upgrade repository structure...")
+    
+    # Test the example URL provided
+    test_url = "https://github.com/TemporalDistoriton/DropfleetTTS/blob/main/UCM/Upgrades/Cobra%20Heavy%20Laser%20Pair.png?raw=true"
+    
+    try:
+        response = requests.head(test_url)
+        if response.status_code == 200:
+            print(f"SUCCESS! Upgrade URL format works: {test_url}")
+            
+            # Set the global constants based on the format
+            global GITHUB_RAW_BASE_URL, USE_RAW_TRUE
+            GITHUB_RAW_BASE_URL = f"https://github.com/{GITHUB_REPO}/blob/main"
+            USE_RAW_TRUE = True
+            
+            return True
+        else:
+            print(f"Upgrade URL format failed with status code: {response.status_code}")
+            return False
+    except Exception as e:
+        print(f"Error testing upgrade URL format: {e}")
+        return False
 
 def update_ship_card_script(lua_script, determined_faction, ship_name, object_name):
     """
@@ -345,6 +421,49 @@ def update_ship_card_script(lua_script, determined_faction, ship_name, object_na
     
     return modified_script, new_model_url, new_card_front_url
 
+def update_upgrade_card_script(lua_script, determined_faction, upgrade_name, object_name):
+    """
+    Update the upgrade card script with GitHub image URLs
+    Returns:
+        - modified script
+        - new card image URL (or None if not updated)
+    """
+    # Check if upgrade image exists in GitHub
+    upgrade_exists, upgrade_path = check_image_exists(determined_faction, upgrade_name, is_upgrade=True)
+    
+    # Get current image URL
+    current_card_image = extract_parameter(lua_script, 'cardImage')
+    
+    # Log errors if image doesn't exist
+    if not upgrade_exists:
+        error_log.append(f"ERROR: Upgrade image not found for {upgrade_name} in {determined_faction} faction (tried path: {upgrade_path})")
+        return lua_script, None
+    
+    # Get GitHub URL for image
+    upgrade_url = get_github_image_url(determined_faction, upgrade_name, is_upgrade=True)
+    
+    # Create a modified script
+    modified_script = lua_script
+    
+    # Update the cardImage URL
+    card_pattern = r"((?:local\s+cardImage\s*=\s*|cardImage\s*=\s*)['\"])https?://[^'\"]+(['\"])"
+    modified_script = re.sub(card_pattern, r"\1" + upgrade_url + r"\2", modified_script)
+    print(f"Updated Upgrade image URL for {upgrade_name} to {upgrade_url}")
+    
+    # Update the faction if necessary
+    faction_patterns = [
+        r"(local\s+faction\s*=\s*['\"]).+?(['\"])",  # local faction = "UCM"
+        r"(faction\s*=\s*data\.faction\s+or\s+['\"]).+?(['\"])"  # faction = data.faction or "UCM"
+    ]
+    
+    for pattern in faction_patterns:
+        if re.search(pattern, modified_script):
+            modified_script = re.sub(pattern, r"\1" + determined_faction + r"\2", modified_script)
+            print(f"Updated faction to {determined_faction} for upgrade {upgrade_name}")
+            break
+    
+    return modified_script, upgrade_url
+
 def should_skip_container(container_path):
     """
     Check if we should skip this container and its contents
@@ -408,9 +527,9 @@ def find_container_path(hierarchy, guid):
     
     return path[::-1]  # Reverse to get top-to-bottom order
 
-def process_object_states(object_states, container_hierarchy, parent_path=None, depth=0, modified=False):
+def process_object_states(object_states, container_hierarchy, parent_path=None, depth=0, modified=False, processing_mode=MODE_BOTH):
     """
-    Recursively process object states to find and update ship card scripts
+    Recursively process object states to find and update ship card scripts and upgrade cards
     Returns True if any modifications were made
     """
     if depth > 10:  # Prevent infinite recursion
@@ -440,17 +559,29 @@ def process_object_states(object_states, container_hierarchy, parent_path=None, 
         if "LuaScript" in obj and obj["LuaScript"]:
             lua_script = obj["LuaScript"]
             
-            # Check if this is a ship card script
-            if is_ship_card_script(lua_script):
+            # Find container path for this object
+            container_path = find_container_path(container_hierarchy, obj_guid)
+            
+            # Skip this object if it's in an ignored container
+            if should_skip_container(container_path):
+                print(f"Skipping object in ignored container: {' > '.join(container_path)}")
+                continue
+            
+            # Determine faction from container path
+            determined_faction = "Neutral"
+            for container_name in container_path:
+                faction = determine_faction_from_container(container_name)
+                if faction != "Neutral":
+                    determined_faction = faction
+                    break
+            
+            # If we still don't have a faction, try the current object's name
+            if determined_faction == "Neutral":
+                determined_faction = determine_faction_from_container(obj_nickname)
+            
+            # Process ship cards
+            if (processing_mode == MODE_SHIPS_ONLY or processing_mode == MODE_BOTH) and is_ship_card_script(lua_script):
                 print(f"Found ship card script in object: {obj_nickname}")
-                
-                # Find container path for this object
-                container_path = find_container_path(container_hierarchy, obj_guid)
-                
-                # Skip this object if it's in an ignored container
-                if should_skip_container(container_path):
-                    print(f"Skipping ship card in ignored container: {' > '.join(container_path)}")
-                    continue
                 
                 # Extract all parameters for the Excel file
                 ship_data = {}
@@ -470,19 +601,7 @@ def process_object_states(object_states, container_hierarchy, parent_path=None, 
                     ship_data['name'] = ship_name
                     print(f"Using object nickname '{ship_name}' as ship name was not found in script")
                 
-                # Determine faction from container path
-                determined_faction = "Neutral"
-                for container_name in container_path:
-                    faction = determine_faction_from_container(container_name)
-                    if faction != "Neutral":
-                        determined_faction = faction
-                        break
-                
-                # If we still don't have a faction, try the current object's name
-                if determined_faction == "Neutral":
-                    determined_faction = determine_faction_from_container(obj_nickname)
-                
-                print(f"Determined faction: {determined_faction} for {ship_name}")
+                print(f"Determined faction: {determined_faction} for ship {ship_name}")
                 
                 # Use the container-determined faction as the main faction field
                 ship_data['faction'] = determined_faction
@@ -502,179 +621,119 @@ def process_object_states(object_states, container_hierarchy, parent_path=None, 
                 if updated_script != lua_script:
                     obj["LuaScript"] = updated_script
                     modified = True
+            
+            # Process upgrade cards
+            elif (processing_mode == MODE_UPGRADES_ONLY or processing_mode == MODE_BOTH) and is_upgrade_card_script(lua_script):
+                print(f"Found upgrade card script in object: {obj_nickname}")
+                
+                # Extract parameters for the Excel file
+                upgrade_data = {}
+                for param in UPGRADE_PARAMETERS:
+                    upgrade_data[param] = extract_parameter(lua_script, param)
+                
+                # Add object info
+                upgrade_data['object_name'] = obj_nickname
+                upgrade_data['object_guid'] = obj_guid
+                upgrade_data['container_path'] = " > ".join(container_path)
+                
+                # Extract the upgrade name
+                upgrade_name = upgrade_data['name']
+                if not upgrade_name or upgrade_name == "Unknown":
+                    # Use the object nickname if the name is not found
+                    upgrade_name = obj_nickname
+                    upgrade_data['name'] = upgrade_name
+                    print(f"Using object nickname '{upgrade_name}' as upgrade name was not found in script")
+                
+                print(f"Determined faction: {determined_faction} for upgrade {upgrade_name}")
+                
+                # Use the container-determined faction
+                upgrade_data['faction'] = determined_faction
+                
+                # Update the script and get new image URL
+                updated_script, new_card_url = update_upgrade_card_script(
+                    lua_script, determined_faction, upgrade_name, obj_nickname)
+                
+                # Store the new image URL
+                upgrade_data['new_card_url'] = new_card_url if new_card_url else "Not Updated"
+                
+                # Add to the extracted upgrade data for Excel
+                extracted_upgrade_data.append(upgrade_data)
+                
+                # If the script was changed, update it in the object
+                if updated_script != lua_script:
+                    obj["LuaScript"] = updated_script
+                    modified = True
         
         # Process contained objects recursively and track if modifications were made
         if "ContainedObjects" in obj and obj["ContainedObjects"]:
-            child_modified = process_object_states(obj["ContainedObjects"], container_hierarchy, current_path, depth + 1, modified)
+            child_modified = process_object_states(
+                obj["ContainedObjects"], 
+                container_hierarchy, 
+                current_path, 
+                depth + 1, 
+                modified,
+                processing_mode
+            )
             if child_modified:
                 modified = True
     
     return modified
 
-def create_excel_file(script_dir):
+def create_excel_file(script_dir, mode):
     """
-    Create an Excel file with the extracted data
+    Create Excel file(s) with the extracted data
     """
-    if not extracted_data:
-        print("No data to write to Excel file.")
-        return
-    
-    # Create a DataFrame from the extracted data
-    df = pd.DataFrame(extracted_data)
-    
-    # Reorder columns for better readability
-    columns_order = [
-        'name', 'faction', 'baseScale', 'health', 'sig', 'points',
-        'modelImage', 'new_model_url', 'cardFrontImage', 'new_card_front_url',
-        'object_name', 'object_guid', 'container_path'
-    ]
-    
-    # Filter to only existing columns in the DataFrame
-    existing_columns = [col for col in columns_order if col in df.columns]
-    df = df[existing_columns]
-    
-    # Create the Excel file
-    excel_file = os.path.join(script_dir, "ShipCardUpdateData.xlsx")
-    try:
-        df.to_excel(excel_file, index=False, engine='openpyxl')
-        print(f"Saved data to Excel file: {excel_file}")
-    except ImportError:
-        # If openpyxl is not installed, save as CSV instead
-        csv_file = os.path.join(script_dir, "ShipCardUpdateData.csv")
-        df.to_csv(csv_file, index=False)
-        print(f"Openpyxl not installed. Saved data to CSV file instead: {csv_file}")
-        print("To save as Excel, install openpyxl: pip install openpyxl")
-
-def process_tts_save_file(save_file_path):
-    """
-    Process a TTS save file (JSON), update ship card scripts with GitHub URLs,
-    and save the modified file
-    """
-    print(f"Processing TTS save file: {save_file_path}")
-    script_dir = os.path.dirname(os.path.abspath(save_file_path))
-    if not script_dir:
-        script_dir = os.getcwd()
-    
-    # Test repository URL structure
-    test_repository_structure()
-    
-    try:
-        # Clear previous extracted data
-        extracted_data.clear()
+    # Create ships Excel file if needed
+    if (mode == MODE_SHIPS_ONLY or mode == MODE_BOTH) and extracted_data:
+        # Create a DataFrame from the extracted data
+        df_ships = pd.DataFrame(extracted_data)
         
-        # Read the TTS save file
-        with open(save_file_path, 'r', encoding='utf-8', errors='ignore') as file:
-            save_data = json.load(file)
+        # Reorder columns for better readability
+        ship_columns_order = [
+            'name', 'faction', 'baseScale', 'health', 'sig', 'points',
+            'modelImage', 'new_model_url', 'cardFrontImage', 'new_card_front_url',
+            'object_name', 'object_guid', 'container_path'
+        ]
         
-        # Process the save data
-        if "ObjectStates" in save_data:
-            # Create a container hierarchy to track parent containers
-            container_hierarchy = {}
-            
-            # First pass: build the container hierarchy
-            build_container_hierarchy(save_data["ObjectStates"], container_hierarchy)
-            
-            # Second pass: process objects using the container hierarchy
-            modified = process_object_states(save_data["ObjectStates"], container_hierarchy)
-            
-            # Create Excel file with the extracted data
-            create_excel_file(script_dir)
-            
-            # Save the modified file if changes were made
-            if modified and SAVE_CHANGES:
-                # Create a backup of the original file
-                backup_path = save_file_path + ".backup"
-                if not os.path.exists(backup_path):
-                    with open(backup_path, 'w', encoding='utf-8') as file:
-                        json.dump(save_data, file, indent=2)
-                    print(f"Created backup of original file: {backup_path}")
-                
-                # Save the modified file
-                modified_path = os.path.splitext(save_file_path)[0] + "_modified.json"
-                with open(modified_path, 'w', encoding='utf-8') as file:
-                    json.dump(save_data, file, indent=2)
-                print(f"Saved modified file: {modified_path}")
-                return True
-            elif modified:
-                print("Changes were detected, but not saved (SAVE_CHANGES is False)")
-                return True
-            else:
-                print("No changes were made to the file")
-                return False
-        else:
-            print("Invalid TTS save file format. Missing 'ObjectStates' array.")
-            return False
-    except json.JSONDecodeError:
-        print(f"Error: {save_file_path} is not a valid JSON file.")
-        return False
-    except Exception as e:
-        print(f"Error processing {save_file_path}: {e}")
-        import traceback
-        traceback.print_exc()
-        return False
-
-def write_error_log():
-    """
-    Write error log to a file
-    """
-    if error_log:
-        log_file = "update_errors.log"
-        with open(log_file, 'w', encoding='utf-8') as file:
-            file.write("UPDATE ERRORS LOG\n")
-            file.write("================\n\n")
-            file.write(f"Repository: {GITHUB_REPO}\n")
-            file.write(f"Image path format: {GITHUB_RAW_BASE_URL}\n")
-            file.write(f"Use raw=true: {USE_RAW_TRUE}\n")
-            file.write("================\n\n")
-            for error in error_log:
-                file.write(f"{error}\n")
-        print(f"Wrote {len(error_log)} errors to {log_file}")
-
-if __name__ == "__main__":
-    # Check if openpyxl is installed
-    try:
-        import openpyxl
-        print("openpyxl is installed. Excel output is available.")
-    except ImportError:
-        print("WARNING: openpyxl is not installed. Will save as CSV instead of Excel.")
-        print("To save as Excel, install openpyxl: pip install openpyxl")
-    
-    # Look for a TTS save file (.json) in the same directory as the script
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    if not script_dir:  # If empty string (current directory)
-        script_dir = os.getcwd()
+        # Filter to only existing columns in the DataFrame
+        existing_ship_columns = [col for col in ship_columns_order if col in df_ships.columns]
+        df_ships = df_ships[existing_ship_columns]
         
-    json_files = [f for f in os.listdir(script_dir) if f.endswith('.json') and not f.endswith('.backup') and not f.endswith('_modified.json')]
-    
-    if not json_files:
-        print("No JSON files found in the script directory.")
-        save_file = input("Enter the path to your TTS save file (.json): ")
-    else:
-        print("Found JSON files:")
-        for i, f in enumerate(json_files):
-            print(f"{i+1}. {f}")
-        
-        selection = input("Enter the number of the TTS save file to process (or enter a different file path): ")
-        
+        # Create the Excel file
+        ships_excel_file = os.path.join(script_dir, "ShipCardUpdateData.xlsx")
         try:
-            index = int(selection) - 1
-            if 0 <= index < len(json_files):
-                save_file = os.path.join(script_dir, json_files[index])
-            else:
-                raise ValueError("Invalid selection")
-        except ValueError:
-            save_file = selection if os.path.exists(selection) else None
+            df_ships.to_excel(ships_excel_file, index=False, engine='openpyxl')
+            print(f"Saved ship data to Excel file: {ships_excel_file}")
+        except ImportError:
+            # If openpyxl is not installed, save as CSV instead
+            ships_csv_file = os.path.join(script_dir, "ShipCardUpdateData.csv")
+            df_ships.to_csv(ships_csv_file, index=False)
+            print(f"Openpyxl not installed. Saved ship data to CSV file instead: {ships_csv_file}")
     
-    if not save_file or not os.path.exists(save_file):
-        print("Invalid file path.")
-    else:
-        # Process the TTS save file
-        result = process_tts_save_file(save_file)
+    # Create upgrades Excel file if needed
+    if (mode == MODE_UPGRADES_ONLY or mode == MODE_BOTH) and extracted_upgrade_data:
+        # Create a DataFrame from the extracted upgrade data
+        df_upgrades = pd.DataFrame(extracted_upgrade_data)
         
-        # Write error log if needed
-        write_error_log()
+        # Reorder columns for better readability
+        upgrade_columns_order = [
+            'name', 'faction', 'points',
+            'cardImage', 'new_card_url',
+            'object_name', 'object_guid', 'container_path'
+        ]
         
-        if result:
-            print(f"Process completed. Check update_errors.log for any errors.")
-        else:
-            print(f"Process completed without making changes.")
+        # Filter to only existing columns in the DataFrame
+        existing_upgrade_columns = [col for col in upgrade_columns_order if col in df_upgrades.columns]
+        df_upgrades = df_upgrades[existing_upgrade_columns]
+        
+        # Create the Excel file
+        upgrades_excel_file = os.path.join(script_dir, "UpgradeCardUpdateData.xlsx")
+        try:
+            df_upgrades.to_excel(upgrades_excel_file, index=False, engine='openpyxl')
+            print(f"Saved upgrade data to Excel file: {upgrades_excel_file}")
+        except ImportError:
+            # If openpyxl is not installed, save as CSV instead
+            upgrades_csv_file = os.path.join(script_dir, "UpgradeCardUpdateData.csv")
+            df_upgrades.to_csv(upgrades_csv_file, index=False)
+            print(f"Openpyxl not installed. Saved upgrade data to CSV file instead: {upgrades_csv_file}")
+            print("To save as Excel, install openpyxl: pip install openpyxl")
