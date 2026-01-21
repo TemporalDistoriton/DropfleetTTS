@@ -1,0 +1,318 @@
+{
+  "SaveName": "",
+  "Date": "",
+  "VersionNumber": "",
+  "GameMode": "",
+  "GameType": "",
+  "GameComplexity": "",
+  "Tags": [],
+  "Gravity": 0.5,
+  "PlayArea": 0.5,
+  "Table": "",
+  "Sky": "",
+  "Note": "",
+  "TabStates": {},
+  "LuaScript": "",
+  "LuaScriptState": "",
+  "XmlUI": "",
+  "ObjectStates": [
+    {
+      "GUID": "2c5559",
+      "Name": "Custom_Model",
+      "Transform": {
+        "posX": 4.489757E-07,
+        "posY": 0.9599998,
+        "posZ": -1.19424328E-07,
+        "rotX": 6.30251748E-07,
+        "rotY": 270.0,
+        "rotZ": 1.03112745E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Meleager Blockade Runner",
+      "Description": "Light Ship",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": false,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "CustomMesh": {
+        "MeshURL": "https://steamusercontent-a.akamaihd.net/ugc/1005936482536388387/BD0A707A775B41C8F2B5122D1F0CEA7D92D81D96/",
+        "DiffuseURL": "https://raw.githubusercontent.com/TemporalDistoriton/DropfleetTTS/main/PHR/Meleager%20Blockade%20Runner_ModelImage.png",
+        "NormalURL": "",
+        "ColliderURL": "https://steamusercontent-a.akamaihd.net/ugc/1005936288672530315/3FD9D63624C70A88F244EDDAA7C1990458FE6C67/",
+        "Convex": true,
+        "MaterialIndex": 0,
+        "TypeIndex": 0,
+        "CustomShader": {
+          "SpecularColor": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0
+          },
+          "SpecularIntensity": 0.1,
+          "SpecularSharpness": 2.0,
+          "FresnelStrength": 1.0
+        },
+        "CastShadows": true
+      },
+      "LuaScript": "--[[\r\n    Radial/Polar Movement Control Script - Enhanced\r\n]]\r\n\r\n-- CONFIGURATION\r\n-----------------------------------------------------------------------------------------\r\n-- The maximum distance (in inches/units) the model can move from its starting point\r\nlocal MAX_RANGE = 10\r\n\r\n-- The maximum angle (in degrees) the model can rotate left or right from its starting facing\r\nlocal MAX_TURN_ANGLE = 45\r\n\r\n-- The distance (in inches) the cursor must move from the center before the model \r\n-- reacts. This prevents unwanted rotation/movement on initial pickup. \r\n-- This is very important for preventing a janky feeling\r\nlocal MOVEMENT_THRESHOLD = 0.1\r\n\r\n-- Controls how quickly the model catches up to the cursor (Smoothing). \r\n-- Higher values = Snappier, Lower values = Smoother/Slower.\r\nlocal SMOOTH_SPEED = 6\r\n\r\n-- The radius of the circular scan range (in inches)\r\nlocal SCAN_RADIUS = 8\r\n-- The radius of the signature (in inches)\r\nlocal SIGNATURE_RADIUS_BASE = 10\r\nlocal SIGNATURE_RADIUS_STEP = 3\r\n\r\n-- Set to true if your model geometry faces its local X-axis (Red arrow).\r\n-- Set to false if it faces its local Z-axis (Blue arrow).\r\nlocal MODEL_FACES_X_AXIS = true\r\n\r\n-- Visual Debug lines (optional, set to false to disable)\r\nlocal DRAW_RAIL_LINE = true\r\n\r\n-- Scale correction factor (2.0 corrects for 10 units = 5 inches mismatch)\r\nlocal UNIT_SCALE = 2.0\r\n\r\n-- Vertical offset for lines to prevent Z-fighting\r\nlocal LINE_Y_OFFSET = 0.3\r\n-----------------------------------------------------------------------------------------\r\n\r\nlocal isHeld = false\r\nlocal holdingPlayerColor = nil\r\nlocal showFiringArcs = false\r\nlocal showScan = false\r\nlocal showSignature = false\r\n\r\nlocal cachedFiringArcLines = nil\r\nlocal cachedScanLines = nil\r\nlocal cachedSignatureLines = nil\r\n\r\nlocal currentSignatureRadius = SIGNATURE_RADIUS_BASE\r\n\r\n-- State variables\r\nlocal pivotPosition = nil\r\nlocal startRotation = nil\r\nlocal startForwardVec = nil\r\nlocal currentSmoothedPos = nil\r\n\r\nfunction onLoad()\r\n    -- Ensure buttons are clear on load\r\n    self.clearButtons()\r\n    createButtons()\r\n    \r\n    -- Pre-calculate firing arc lines so we don't do it every frame\r\n    generateFiringArcLines()\r\n    generateScanLines()\r\n    generateSignatureLines()\r\nend\r\n\r\nfunction generateFiringArcLines()\r\n    cachedFiringArcLines = {}\r\n    \r\n    local forward = Vector(0,0,1)\r\n    if MODEL_FACES_X_AXIS then forward = Vector(1,0,0) end\r\n    \r\n    local arcLineColor = {1, 1, 1}       -- White\r\n    \r\n    -- Helper to add symmetric lines\r\n    local function addAngleLines(angleDeg)\r\n        local rotRight = forward:copy():rotateOver('y', angleDeg)\r\n        local rotLeft = forward:copy():rotateOver('y', -angleDeg)\r\n        \r\n        -- Line 1 (Right side) - 60 inches total centered (30 each way)\r\n        local p1 = rotRight * (30 * UNIT_SCALE)\r\n        local p2 = rotRight * (-30 * UNIT_SCALE)\r\n        p1.y = LINE_Y_OFFSET\r\n        p2.y = LINE_Y_OFFSET\r\n        \r\n        table.insert(cachedFiringArcLines, {\r\n            points = { p1, p2 },\r\n            color = arcLineColor,\r\n            thickness = 0.1\r\n        })\r\n        \r\n        -- Line 2 (Left side)\r\n        local p3 = rotLeft * (30 * UNIT_SCALE)\r\n        local p4 = rotLeft * (-30 * UNIT_SCALE)\r\n        p3.y = LINE_Y_OFFSET\r\n        p4.y = LINE_Y_OFFSET\r\n        \r\n        table.insert(cachedFiringArcLines, {\r\n            points = { p3, p4 },\r\n            color = arcLineColor,\r\n            thickness = 0.1\r\n        })\r\n    end\r\n    \r\n    -- Front/Side/Rear\r\n    addAngleLines(45)\r\n    -- Front/Rear Narrow\r\n    addAngleLines(11)\r\nend\r\n\r\nfunction generateScanLines()\r\n    cachedScanLines = {}\r\n    local circleColor = {0.5, 1, 0.5}    -- Light Green\r\n    \r\n    -- Circle Scan Range\r\n    local circlePoints = {}\r\n    local segments = 64\r\n    local step = 360 / segments\r\n    for i = 0, segments do\r\n        local angle = math.rad(i * step)\r\n        local x = math.cos(angle) * SCAN_RADIUS * UNIT_SCALE\r\n        local z = math.sin(angle) * SCAN_RADIUS * UNIT_SCALE\r\n        table.insert(circlePoints, Vector(x, LINE_Y_OFFSET, z))\r\n    end\r\n    \r\n    table.insert(cachedScanLines, {\r\n        points = circlePoints,\r\n        color = circleColor,\r\n        thickness = 0.1\r\n    })\r\nend\r\n\r\nfunction generateSignatureLines()\r\n    cachedSignatureLines = {}\r\n    local circleColor = {1, 0.5, 0.5}    -- Light Red\r\n    \r\n    local circlePoints = {}\r\n    local segments = 64\r\n    local step = 360 / segments\r\n    for i = 0, segments do\r\n        local angle = math.rad(i * step)\r\n        local x = math.cos(angle) * currentSignatureRadius * UNIT_SCALE\r\n        local z = math.sin(angle) * currentSignatureRadius * UNIT_SCALE\r\n        table.insert(circlePoints, Vector(x, LINE_Y_OFFSET, z))\r\n    end\r\n    \r\n    table.insert(cachedSignatureLines, {\r\n        points = circlePoints,\r\n        color = circleColor,\r\n        thickness = 0.1\r\n    })\r\nend\r\n\r\n\r\n-- Event: Called when a player picks up the object\r\nfunction onPickUp(player_color)\r\n    isHeld = true\r\n    holdingPlayerColor = player_color\r\n    \r\n    -- Clear any existing Undo button immediately when picked up\r\n    self.clearButtons()\r\n    \r\n    -- Record the position and rotation where the object was picked up\r\n    -- This serves as both the Pivot Point for movement and the Undo target\r\n    pivotPosition = self.getPosition()\r\n    startRotation = self.getRotation()\r\n    currentSmoothedPos = self.getPosition()\r\n    \r\n    -- Determine the starting \"Forward\" vector based on the model configuration\r\n    if MODEL_FACES_X_AXIS then\r\n        startForwardVec = self.getTransformRight() -- Local X-axis\r\n    else\r\n        startForwardVec = self.getTransformForward() -- Local Z-axis\r\n    end\r\n    -- Flatten Y to ensure 2D calculations\r\n    startForwardVec.y = 0\r\n    startForwardVec:normalize()\r\nend\r\n\r\n-- Event: Called when a player drops the object\r\nfunction onDrop(player_color)\r\n    isHeld = false\r\n    holdingPlayerColor = nil\r\n    \r\n    -- NOTE: We do NOT clear pivotPosition/startRotation here, \r\n    -- because we need them for the Undo button.\r\n    \r\n    -- Clear physics velocities to prevent \"fling\" effect on release\r\n    self.setVelocity(Vector(0, 0, 0))\r\n    self.setAngularVelocity(Vector(0, 0, 0))\r\n    \r\n    -- Clear visual debug lines\r\n    if DRAW_RAIL_LINE then\r\n        self.setVectorLines({})\r\n    end\r\n    \r\n    -- Create the Buttons\r\n    createUndoButton()\r\n    createButtons()\r\n    \r\n    -- If arcs were on, ensure they are redrawn cleanly\r\n    updateStaticVisuals()\r\nend\r\n\r\nfunction createButtons()\r\n    -- Firing Arcs Button\r\n    self.createButton({\r\n        click_function = \"click_toggle_arcs\",\r\n        function_owner = self,\r\n        label          = \"Firing Arcs\",\r\n        position       = {0, 7, 3},\r\n        width          = 1100,\r\n        height         = 300,\r\n        font_size      = 150,\r\n        color          = {0, 0, 1},\r\n        font_color     = {1, 1, 1},\r\n        tooltip        = \"Toggle firing arc visibility\"\r\n    })\r\n    \r\n    -- Scan Button\r\n    self.createButton({\r\n        click_function = \"click_toggle_scan\",\r\n        function_owner = self,\r\n        label          = \"Scan\",\r\n        position       = {0, 7, 3.6},\r\n        width          = 1100,\r\n        height         = 300,\r\n        font_size      = 150,\r\n        color          = {0, 0.5, 0},\r\n        font_color     = {1, 1, 1},\r\n        tooltip        = \"Toggle scan range visibility\"\r\n    })\r\n\r\n    -- Signature Row\r\n    -- Main Signature Toggle\r\n    self.createButton({\r\n        click_function = \"click_toggle_signature\",\r\n        function_owner = self,\r\n        label          = \"Sig: \" .. currentSignatureRadius,\r\n        position       = {0, 7, 4.2},\r\n        width          = 800,\r\n        height         = 300,\r\n        font_size      = 150,\r\n        color          = {0.8, 0, 0},\r\n        font_color     = {1, 1, 1},\r\n        tooltip        = \"Toggle signature visibility\"\r\n    })\r\n    \r\n    -- Decrease Signature (-)\r\n    self.createButton({\r\n        click_function = \"click_decrease_signature\",\r\n        function_owner = self,\r\n        label          = \"-\",\r\n        position       = {-1.5, 7, 4.2},\r\n        width          = 300,\r\n        height         = 300,\r\n        font_size      = 200,\r\n        color          = {0.5, 0, 0},\r\n        font_color     = {1, 1, 1},\r\n        tooltip        = \"Decrease signature\"\r\n    })\r\n\r\n    -- Increase Signature (+)\r\n    self.createButton({\r\n        click_function = \"click_increase_signature\",\r\n        function_owner = self,\r\n        label          = \"+\",\r\n        position       = {1.5, 7, 4.2},\r\n        width          = 300,\r\n        height         = 300,\r\n        font_size      = 200,\r\n        color          = {0.5, 0, 0},\r\n        font_color     = {1, 1, 1},\r\n        tooltip        = \"Increase signature\"\r\n    })\r\nend\r\n\r\nfunction updateButtons()\r\n    -- Re-create all buttons to update labels (simplest method for TTS Lua)\r\n    if not isHeld then\r\n        self.clearButtons()\r\n        createUndoButton()\r\n        createButtons()\r\n    end\r\nend\r\n\r\nfunction click_toggle_arcs(obj, player_color, alt_click)\r\n    showFiringArcs = not showFiringArcs\r\n    updateStaticVisuals()\r\nend\r\n\r\nfunction click_toggle_scan(obj, player_color, alt_click)\r\n    showScan = not showScan\r\n    updateStaticVisuals()\r\nend\r\n\r\nfunction click_toggle_signature(obj, player_color, alt_click)\r\n    showSignature = not showSignature\r\n    updateStaticVisuals()\r\nend\r\n\r\nfunction click_increase_signature(obj, player_color, alt_click)\r\n    currentSignatureRadius = currentSignatureRadius + SIGNATURE_RADIUS_STEP\r\n    generateSignatureLines()\r\n    updateStaticVisuals()\r\n    updateButtons()\r\nend\r\n\r\nfunction click_decrease_signature(obj, player_color, alt_click)\r\n    local newSig = currentSignatureRadius - SIGNATURE_RADIUS_STEP\r\n    if newSig >= SIGNATURE_RADIUS_BASE then\r\n        currentSignatureRadius = newSig\r\n        generateSignatureLines()\r\n        updateStaticVisuals()\r\n        updateButtons()\r\n    end\r\nend\r\n\r\nfunction updateStaticVisuals()\r\n    local finalLines = {}\r\n    \r\n    if showFiringArcs and cachedFiringArcLines then\r\n        for _, l in ipairs(cachedFiringArcLines) do table.insert(finalLines, l) end\r\n    end\r\n    \r\n    if showScan and cachedScanLines then\r\n        for _, l in ipairs(cachedScanLines) do table.insert(finalLines, l) end\r\n    end\r\n    \r\n    if showSignature and cachedSignatureLines then\r\n        for _, l in ipairs(cachedSignatureLines) do table.insert(finalLines, l) end\r\n    end\r\n    \r\n    self.setVectorLines(finalLines)\r\nend\r\n\r\nfunction createUndoButton()\r\n    -- We want the button to float slightly above the object.\r\n    -- Bounds size is global, so we divide by scale to get local position Y\r\n    local globalHeight = self.getBoundsNormalized().size.y\r\n    local scaleY = self.getScale().y\r\n    \r\n    self.createButton({\r\n        click_function = \"click_undo\",\r\n        function_owner = self,\r\n        label          = \"Undo Move\",\r\n        position       = {0, 7, 0},\r\n        rotation       = {0, 0, 0},\r\n        width          = 1100,\r\n        height         = 300,\r\n        font_size      = 200,\r\n        color          = {1, 0, 0},\r\n        font_color     = {0, 0, 0},\r\n        tooltip        = \"Revert to position before pickup\"\r\n    })\r\nend\r\n\r\nfunction click_undo(obj, player_color, alt_click)\r\n    if pivotPosition and startRotation then\r\n        self.setPositionSmooth(pivotPosition)\r\n        self.setRotationSmooth(startRotation)\r\n        \r\n        -- After undoing, we remove the button since we are back at start\r\n        self.clearButtons()\r\n        createButtons() -- Re-add the arc button as clearButtons wipes it\r\n    end\r\nend\r\n\r\n-- Event: Called every frame\r\nfunction onUpdate()\r\n    -- Only run logic if the object is currently being held\r\n    if isHeld and pivotPosition and holdingPlayerColor then\r\n        local player = Player[holdingPlayerColor]\r\n        \r\n        -- Safety check if player disconnects mid-hold\r\n        if player then\r\n            updateRadialMovement(player)\r\n        else\r\n            -- Force drop if player is gone\r\n            onDrop(nil)\r\n        end\r\n    end\r\nend\r\n\r\nfunction updateRadialMovement(player)\r\n    local pointerPos = player.getPointerPosition()\r\n    \r\n    -- 1. Calculate Direction and Distance\r\n    local diffX = pointerPos.x - pivotPosition.x\r\n    local diffZ = pointerPos.z - pivotPosition.z\r\n    local directionVec = Vector(diffX, 0, diffZ)\r\n    local currentDist = directionVec:magnitude()\r\n    \r\n    -- 2. Deadzone / Movement Threshold Check\r\n    -- If we haven't moved far enough, lock to original position/rotation\r\n    if currentDist < MOVEMENT_THRESHOLD * UNIT_SCALE then\r\n        self.setPosition(pivotPosition)\r\n        self.setRotation(startRotation)\r\n        self.setVelocity(Vector(0,0,0))\r\n        self.setAngularVelocity(Vector(0,0,0))\r\n        \r\n        currentSmoothedPos = pivotPosition\r\n        \r\n        -- Clear lines if inside deadzone (but keep arcs if enabled)\r\n        updateStaticVisuals()\r\n        return\r\n    end\r\n    \r\n    -- 3. Calculate Direction & Clamp Angle\r\n    -- Initial direction towards cursor\r\n    local moveDir = directionVec:normalized()\r\n    \r\n    -- Calculate angle difference between Start Forward and Current Direction\r\n    local angleDiff = Vector.angle(startForwardVec, moveDir)\r\n    \r\n    -- Check if angle exceeds limit\r\n    if angleDiff > MAX_TURN_ANGLE then\r\n        -- Determine if we are to the left or right?\r\n        -- We use Cross Product. Up/Down (Y) tells us the side.\r\n        -- TTS/Unity: Y is up.\r\n        local cross = startForwardVec:cross(moveDir)\r\n        \r\n        -- Determine the sign of the rotation based on the Y component of the cross product\r\n        local sign = 1\r\n        if cross.y < 0 then sign = -1 end\r\n        \r\n        -- Override moveDir to the max clamped angle\r\n        -- We take the start vector and rotate it by the max angle in the correct direction\r\n        -- rotateOver modifies self, so we copy() first\r\n        moveDir = startForwardVec:copy():rotateOver('y', sign * MAX_TURN_ANGLE)\r\n    end\r\n    \r\n    -- 4. Calculate New Position (using clamped direction)\r\n    -- Clamp distance to MAX_RANGE\r\n    local clampDist = math.min(currentDist, MAX_RANGE * UNIT_SCALE)\r\n    \r\n    local targetPos = pivotPosition + (moveDir * clampDist)\r\n    \r\n    -- Preserve the object's current height (controlled by the player's hand lift)\r\n    local currentHandPos = self.getPosition()\r\n    targetPos.y = currentHandPos.y\r\n    \r\n    -- Smoothly interpolation towards the target position\r\n    if currentSmoothedPos == nil then currentSmoothedPos = pivotPosition end\r\n\r\n    -- Use persistent smoothed position to avoid physics/hand-drag fighting\r\n    currentSmoothedPos = currentSmoothedPos:lerp(targetPos, Time.delta_time * SMOOTH_SPEED)\r\n    \r\n    -- Keep Y responsive (prevent vertical lag)\r\n    currentSmoothedPos.y = targetPos.y\r\n\r\n    self.setPosition(currentSmoothedPos)\r\n    \r\n    -- 5. Calculate Rotation (Face Outwards along the clamped direction)\r\n    -- Get the angle of the valid movement vector\r\n    local targetAngle = moveDir:heading(\"y\")\r\n    if MODEL_FACES_X_AXIS then\r\n        targetAngle = targetAngle - 90\r\n    end\r\n    \r\n    self.setRotation(Vector(0, targetAngle, 0))\r\n    \r\n    -- 6. Physics Cleanup\r\n    self.setVelocity(Vector(0,0,0))\r\n    self.setAngularVelocity(Vector(0,0,0))\r\n    \r\n    -- 7. Visual Feedback\r\n    local finalLines = {}\r\n\r\n    -- Add sticky Firing Arcs if enabled (so they move with the ship)\r\n    if showFiringArcs and cachedFiringArcLines then\r\n        for _, l in ipairs(cachedFiringArcLines) do table.insert(finalLines, l) end\r\n    end\r\n    \r\n    if showScan and cachedScanLines then\r\n        for _, l in ipairs(cachedScanLines) do table.insert(finalLines, l) end\r\n    end\r\n    \r\n    if showSignature and cachedSignatureLines then\r\n        for _, l in ipairs(cachedSignatureLines) do table.insert(finalLines, l) end\r\n    end\r\n\r\n    if DRAW_RAIL_LINE then\r\n        -- Calculate visual direction based on actual ship position relative to pivot\r\n        local visualDir = moveDir\r\n        local shipOffset = currentSmoothedPos - pivotPosition\r\n        shipOffset.y = 0 \r\n        \r\n        if shipOffset:magnitude() > 0.1 then\r\n             visualDir = shipOffset:normalized()\r\n        end\r\n\r\n        local railEnd = pivotPosition + (visualDir * MAX_RANGE * UNIT_SCALE)\r\n        \r\n        -- Convert to local for drawing\r\n        local localStart = self.positionToLocal(pivotPosition)\r\n        localStart.y = localStart.y + LINE_Y_OFFSET\r\n        local localEnd = self.positionToLocal(railEnd)\r\n        localEnd.y = localEnd.y + LINE_Y_OFFSET\r\n        \r\n        -- Calculate Limit Lines\r\n        local leftLimitVec = startForwardVec:copy():rotateOver('y', -MAX_TURN_ANGLE)\r\n        local rightLimitVec = startForwardVec:copy():rotateOver('y', MAX_TURN_ANGLE)\r\n        \r\n        local leftLimitEnd = pivotPosition + (leftLimitVec * MAX_RANGE * UNIT_SCALE)\r\n        local rightLimitEnd = pivotPosition + (rightLimitVec * MAX_RANGE * UNIT_SCALE)\r\n        \r\n        local localLeftEnd = self.positionToLocal(leftLimitEnd)\r\n        localLeftEnd.y = localLeftEnd.y + LINE_Y_OFFSET\r\n        local localRightEnd = self.positionToLocal(rightLimitEnd)\r\n        localRightEnd.y = localRightEnd.y + LINE_Y_OFFSET\r\n        \r\n        table.insert(finalLines, {\r\n            points = { localStart, localEnd },\r\n            color = {1, 1, 1},\r\n            thickness = 0.1,\r\n            rotation = {0,0,0}\r\n        })\r\n        \r\n        table.insert(finalLines, {\r\n            points = { localStart, localLeftEnd },\r\n            color = {1, 0, 0},\r\n            thickness = 0.05,\r\n            rotation = {0,0,0}\r\n        })\r\n        \r\n        table.insert(finalLines, {\r\n            points = { localStart, localRightEnd },\r\n            color = {1, 0, 0},\r\n            thickness = 0.05,\r\n            rotation = {0,0,0}\r\n        })\r\n    end\r\n    \r\n    self.setVectorLines(finalLines)\r\nend",
+      "LuaScriptState": "{\"baseSignature\":2,\"originalData\":{\"base\":{\"color\":{\"b\":1,\"g\":1,\"r\":1},\"size\":7.5},\"conditions\":{\"Activated\":0,\"Atmosphere\":0,\"Aura\":0,\"Clockwise\":0,\"CounterClockwise\":0,\"Defence_Systems_Offline\":0,\"Fire\":0,\"Mode\":0,\"MoveNumber\":0,\"Navigation_Offline\":0,\"Orbital_Decay\":0,\"Scanners_Offline\":0,\"ShipCard\":0,\"Silent_Running\":0,\"Spikes\":0,\"Weapons_Offline\":0},\"health\":{\"current\":6,\"max\":6},\"imageScale\":1,\"positionHistory\":[{\"x\":-5.0164589881897,\"y\":1.01000022888184,\"z\":-0.392956763505936},{\"x\":-6.59909248352051,\"y\":1.01000022888184,\"z\":-3.08765459060669},{\"x\":-4.42841529846191,\"y\":1.01000022888184,\"z\":-5.76999759674072},{\"x\":-4.82436084747314,\"y\":1.01000022888184,\"z\":2.87823295593262},{\"x\":-5.70639371871948,\"y\":0.959992647171021,\"z\":-3.78509140014648},{\"x\":-5.16940498352051,\"y\":1.01000010967255,\"z\":-3.45160436630249},{\"x\":-4.12947940826416,\"y\":0.960060298442841,\"z\":-4.00761127471924},{\"x\":-7.28183126449585,\"y\":1.05999338626862,\"z\":-19.3420314788818},{\"x\":-6.50972127914429,\"y\":1.05000925064087,\"z\":-15.3742170333862},{\"x\":-1.7706286907196,\"y\":1.06119620800018,\"z\":-27.9766273498535}],\"sig\":2},\"positionHistory\":[{\"x\":-5.0164589881897,\"y\":1.01000022888184,\"z\":-0.392956763505936},{\"x\":-6.59909248352051,\"y\":1.01000022888184,\"z\":-3.08765459060669},{\"x\":-4.42841529846191,\"y\":1.01000022888184,\"z\":-5.76999759674072},{\"x\":-4.82436084747314,\"y\":1.01000022888184,\"z\":2.87823295593262},{\"x\":-5.70639371871948,\"y\":0.959992647171021,\"z\":-3.78509140014648},{\"x\":-5.16940498352051,\"y\":1.01000010967255,\"z\":-3.45160436630249},{\"x\":-4.12947940826416,\"y\":0.960060298442841,\"z\":-4.00761127471924},{\"x\":-7.28183126449585,\"y\":1.05999338626862,\"z\":-19.3420314788818},{\"x\":-6.50972127914429,\"y\":1.05000925064087,\"z\":-15.3742170333862},{\"x\":-1.7706286907196,\"y\":1.06119620800018,\"z\":-27.9766273498535}],\"SHIPCardURL\":\"https://raw.githubusercontent.com/TemporalDistoriton/DropfleetTTS/main/PHR/Meleager%20Blockade%20Runner_CardFrontImage.png\",\"state\":{\"base\":{\"color\":{\"b\":1,\"g\":1,\"r\":1},\"size\":7.5},\"conditions\":{\"Activated\":0,\"Atmosphere\":0,\"Aura\":0,\"Clockwise\":0,\"CounterClockwise\":0,\"Defence_Systems_Offline\":0,\"Fire\":0,\"Mode\":0,\"MoveNumber\":0,\"Navigation_Offline\":0,\"Orbital_Decay\":0,\"Scanners_Offline\":0,\"ShipCard\":0,\"Silent_Running\":0,\"Spikes\":0,\"Weapons_Offline\":0},\"health\":{\"current\":6,\"max\":6},\"imageScale\":1,\"positionHistory\":[{\"x\":-5.0164589881897,\"y\":1.01000022888184,\"z\":-0.392956763505936},{\"x\":-6.59909248352051,\"y\":1.01000022888184,\"z\":-3.08765459060669},{\"x\":-4.42841529846191,\"y\":1.01000022888184,\"z\":-5.76999759674072},{\"x\":-4.82436084747314,\"y\":1.01000022888184,\"z\":2.87823295593262},{\"x\":-5.70639371871948,\"y\":0.959992647171021,\"z\":-3.78509140014648},{\"x\":-5.16940498352051,\"y\":1.01000010967255,\"z\":-3.45160436630249},{\"x\":-4.12947940826416,\"y\":0.960060298442841,\"z\":-4.00761127471924},{\"x\":-7.28183126449585,\"y\":1.05999338626862,\"z\":-19.3420314788818},{\"x\":-6.50972127914429,\"y\":1.05000925064087,\"z\":-15.3742170333862},{\"x\":-1.7706286907196,\"y\":1.06119620800018,\"z\":-27.9766273498535}],\"sig\":2}}",
+      "XmlUI": "",
+      "CustomUIAssets": [
+        {
+          "Type": 0,
+          "Name": "Navigation_Offline",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2456242493957843974/AA01C58BFE617F260DDDC185A5676E209B3AF6EE/"
+        },
+        {
+          "Type": 0,
+          "Name": "Navigation_Offline_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2456242493957815773/F48FF9B41423F535D3E460A309C87C7DCB510D58/"
+        },
+        {
+          "Type": 0,
+          "Name": "Orbital_Decay",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2456242493963427639/118379CBFCC0095FC1B0C0007A6AF53E3D7F3ECA/"
+        },
+        {
+          "Type": 0,
+          "Name": "Orbital_Decay_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/1005936482532209261/A251D38D2A437456EB2FF1034C1CA064DF1D42A5/"
+        },
+        {
+          "Type": 0,
+          "Name": "Fire",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/1005936482532211732/C7DDA05380D46C229FAC1DBE053A4DC1DE03B8D6/"
+        },
+        {
+          "Type": 0,
+          "Name": "Fire_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/1005936482532211732/C7DDA05380D46C229FAC1DBE053A4DC1DE03B8D6/"
+        },
+        {
+          "Type": 0,
+          "Name": "Weapons_Offline",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2456242493963428311/84543C99A3402B12FF6CAF824DAA8DEBCA25CAFC/"
+        },
+        {
+          "Type": 0,
+          "Name": "Weapons_Offline_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/1005936482532212904/620081408ACBA2B9FCDC14B86CB7C53E44EFEC48/"
+        },
+        {
+          "Type": 0,
+          "Name": "Scanners_Offline",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2456242493963428157/A67BEAE60D330A86665ACFF07DDCE88F86D814DA/"
+        },
+        {
+          "Type": 0,
+          "Name": "Scanners_Offline_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/1005936482532212349/B7AEBA523F75B3360AFEB439BF3C1B5983892557/"
+        },
+        {
+          "Type": 0,
+          "Name": "Defence_Systems_Offline",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2456242493963427532/0C313035666B6D233B09D5251E04E303CE521A42/"
+        },
+        {
+          "Type": 0,
+          "Name": "Defence_Systems_Offline_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/1005936482532207697/960058AA3C70751790AE88C667738D1E1CD95F21/"
+        },
+        {
+          "Type": 0,
+          "Name": "Spikes",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2450611726219379467/42D837366992A9D296B3BF03A2F99D391E6E8369/"
+        },
+        {
+          "Type": 0,
+          "Name": "Spikes_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2450611726219379467/42D837366992A9D296B3BF03A2F99D391E6E8369/"
+        },
+        {
+          "Type": 0,
+          "Name": "Aura",
+          "URL": "https://raw.githubusercontent.com/RobMayer/TTSLibrary/master/ui/movenode.png"
+        },
+        {
+          "Type": 0,
+          "Name": "Aura_active",
+          "URL": "https://raw.githubusercontent.com/RobMayer/TTSLibrary/master/ui/movenode.png"
+        },
+        {
+          "Type": 0,
+          "Name": "Activated",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2401074669102861652/64DCA8462CD439A076D2FBD684BD1107386DAB6B/"
+        },
+        {
+          "Type": 0,
+          "Name": "Activated_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2401074669102865079/6EF5996932FFC48F362C49C3FFEE455CCE8ABF25/"
+        },
+        {
+          "Type": 0,
+          "Name": "Atmosphere",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2456242493963427871/EA26B2AA9EFF60E840F7771CE8AF4AB9581C25C3/"
+        },
+        {
+          "Type": 0,
+          "Name": "Atmosphere_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2450611726219174423/47C52097DDDFEC79385C617040907AC7E866EEE7/"
+        },
+        {
+          "Type": 0,
+          "Name": "Mode",
+          "URL": "https://raw.githubusercontent.com/RobMayer/TTSLibrary/master/ui/gear.png"
+        },
+        {
+          "Type": 0,
+          "Name": "Mode_active",
+          "URL": "https://raw.githubusercontent.com/RobMayer/TTSLibrary/master/ui/gear.png"
+        },
+        {
+          "Type": 0,
+          "Name": "Silent_Running",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2456242493963427992/8604C539C729B94A77B79222E556B3C7461AB83E/"
+        },
+        {
+          "Type": 0,
+          "Name": "Silent_Running_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2450611726219174689/CBCB3D234BB8B4587286779123535EE0CC343A98/"
+        },
+        {
+          "Type": 0,
+          "Name": "Clockwise",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2450611726219326020/21E2C9B879BF1B1DB8EBEB716BF518B7CC0B149B/"
+        },
+        {
+          "Type": 0,
+          "Name": "Clockwise_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2450611726219326020/21E2C9B879BF1B1DB8EBEB716BF518B7CC0B149B/"
+        },
+        {
+          "Type": 0,
+          "Name": "CounterClockwise",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2450611726219326322/5DD7AE1FF69A41D149D2DF60AC32396512F5C022/"
+        },
+        {
+          "Type": 0,
+          "Name": "CounterClockwise_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2450611726219326322/5DD7AE1FF69A41D149D2DF60AC32396512F5C022/"
+        },
+        {
+          "Type": 0,
+          "Name": "TargetSig",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2450611726219633568/1F28145980C5B3C4D3137A781BA7765F98EEE186/"
+        },
+        {
+          "Type": 0,
+          "Name": "TargetSig_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2450611726219633568/1F28145980C5B3C4D3137A781BA7765F98EEE186/"
+        },
+        {
+          "Type": 0,
+          "Name": "Rewind",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2401074669102779659/CE976FAA1821A21895BC97918B89E1CBA1381974/"
+        },
+        {
+          "Type": 0,
+          "Name": "Rewind_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2401074669102779659/CE976FAA1821A21895BC97918B89E1CBA1381974/"
+        },
+        {
+          "Type": 0,
+          "Name": "MoveNumber",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2401074669102861652/64DCA8462CD439A076D2FBD684BD1107386DAB6B/"
+        },
+        {
+          "Type": 0,
+          "Name": "MoveNumber_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2401074669102861652/64DCA8462CD439A076D2FBD684BD1107386DAB6B/"
+        },
+        {
+          "Type": 0,
+          "Name": "FractionNumber",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2401074669102861652/64DCA8462CD439A076D2FBD684BD1107386DAB6B/"
+        },
+        {
+          "Type": 0,
+          "Name": "FractionNumber_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2401074669102861652/64DCA8462CD439A076D2FBD684BD1107386DAB6B/"
+        },
+        {
+          "Type": 0,
+          "Name": "Move",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2401074669103654981/B66E50E5D6FA2F36BB954EE3A8278307BC246A7E/"
+        },
+        {
+          "Type": 0,
+          "Name": "Move_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/2401074669103654981/B66E50E5D6FA2F36BB954EE3A8278307BC246A7E/"
+        },
+        {
+          "Type": 0,
+          "Name": "ProjectArcs",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/1706288520939026206/DE1A0A70ACF68B8D8D0448239210D43B39111072/"
+        },
+        {
+          "Type": 0,
+          "Name": "ProjectArcs_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/1706288520939026206/DE1A0A70ACF68B8D8D0448239210D43B39111072/"
+        },
+        {
+          "Type": 0,
+          "Name": "ShipCard",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/9677217285059447/FFD273DBEB054E6240FD394AA70E350A08F7725A/"
+        },
+        {
+          "Type": 0,
+          "Name": "ShipCard_active",
+          "URL": "https://steamusercontent-a.akamaihd.net/ugc/9677217285059447/FFD273DBEB054E6240FD394AA70E350A08F7725A/"
+        }
+      ],
+      "AttachedDecals": [
+        {
+          "Transform": {
+            "posX": 0.0103494385,
+            "posY": 0.0749992356,
+            "posZ": -0.00753386458,
+            "rotX": 90.0,
+            "rotY": 90.48983,
+            "rotZ": 0.0,
+            "scaleX": 2.71892548,
+            "scaleY": 2.74999666,
+            "scaleZ": 2.74999666
+          },
+          "CustomDecal": {
+            "Name": "NewBase",
+            "ImageURL": "https://steamusercontent-a.akamaihd.net/ugc/2452862258293096446/E963300695752BFB121614AB5CE3A7A687580672/",
+            "Size": 1.0
+          },
+          "OwnerSteamID": 0
+        }
+      ]
+    }
+  ]
+}
