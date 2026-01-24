@@ -32,14 +32,44 @@ def extract_ship_name(page):
     
     return "Unknown_Ship"
 
-def pdf_to_png(pdf_path, output_folder="output", dpi=300):
+def get_crop_rect(page, search_text="Famous Ships of the class"):
+    """
+    Find the text on the page and return a clip rectangle that excludes
+    everything from that text onwards.
+    
+    Returns:
+        fitz.Rect: Clipping rectangle, or None if text not found (use full page)
+    """
+    # Search for the text
+    text_instances = page.search_for(search_text)
+    
+    if text_instances:
+        # Get the first instance of the text
+        first_match = text_instances[0]
+        
+        # Get the y-coordinate where the text starts
+        crop_y = first_match.y0  # Top of the text bounding box
+        
+        # Create a rectangle from top of page to just before the text
+        # Format: fitz.Rect(x0, y0, x1, y1)
+        page_rect = page.rect
+        clip_rect = fitz.Rect(0, 0, page_rect.width, crop_y)
+        
+        return clip_rect
+    
+    # Return None if text not found (will use full page)
+    return None
+
+def pdf_to_png(pdf_path, output_folder="output", dpi=300, crop_text="Famous Ships of the class"):
     """
     Convert each page of a PDF to PNG with ship name in filename.
+    If crop_text is found on a page, only render content before that text.
     
     Args:
         pdf_path: Path to the input PDF file
         output_folder: Folder to save PNG files (default: 'output')
         dpi: Resolution for the output images (default: 300)
+        crop_text: Text to search for cropping (default: 'Famous Ships of the class')
     """
     # Create output folder if it doesn't exist
     if not os.path.exists(output_folder):
@@ -62,18 +92,24 @@ def pdf_to_png(pdf_path, output_folder="output", dpi=300):
         output_filename = f"{ship_name}_CardFrontImage.png"
         output_path = os.path.join(output_folder, output_filename)
         
-        # Convert page to image
         # Calculate zoom factor based on DPI (72 is the default PDF DPI)
         zoom = dpi / 72
         mat = fitz.Matrix(zoom, zoom)
         
-        # Render page to pixmap
-        pix = page.get_pixmap(matrix=mat)
+        # Check if we need to crop the page
+        clip_rect = get_crop_rect(page, crop_text)
+        
+        if clip_rect:
+            # Render only the cropped portion
+            pix = page.get_pixmap(matrix=mat, clip=clip_rect)
+            print(f"Page {page_num + 1}: Cropped at '{crop_text}' - Saved as '{output_filename}'")
+        else:
+            # Render the full page
+            pix = page.get_pixmap(matrix=mat)
+            print(f"Page {page_num + 1}: Full page - Saved as '{output_filename}'")
         
         # Save as PNG
         pix.save(output_path)
-        
-        print(f"Page {page_num + 1}: Saved as '{output_filename}'")
     
     pdf_document.close()
     print(f"\nConversion complete! Files saved in '{output_folder}' folder.")
