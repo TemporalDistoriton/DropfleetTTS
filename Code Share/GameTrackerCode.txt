@@ -1,0 +1,938 @@
+-- ============================================================================
+-- GAME TRACKER - Playtest Data Collection & Feedback System
+-- ============================================================================
+-- Collects game metrics and player feedback for playtest analysis
+-- Features:
+--   - Submit Playtest Data button with feedback form
+--   - Automatic game data collection (rounds, factions, decks, champions, scores)
+--   - Champion-based faction detection (reliable across saves/reloads)
+--   - Scalable design supports adding new factions
+-- ============================================================================
+
+-- ======================
+-- CONFIGURATION
+-- ======================
+local CONFIG = {
+    -- Google Apps Script Web App URL (update this after deploying your script)
+    WEBHOOK_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec",
+    
+    -- COLORS
+    COLORS = {
+        BLACK = {r=0, g=0, b=0},
+        WHITE = {r=1, g=1, b=1},
+        GRAY = {r=0.3, g=0.3, b=0.3},
+        DARK_GRAY = {r=0.15, g=0.15, b=0.15},
+        GREEN = {r=0.2, g=0.7, b=0.2},
+        RED = {r=0.8, g=0.2, b=0.2},
+        BLUE = {r=0.2, g=0.4, b=0.8},
+        GOLD = {r=1, g=0.84, b=0},
+        TRANSPARENT = {r=0, g=0, b=0, a=1}
+    },
+    
+    -- BUTTON POSITIONS
+    BUTTON_POSITIONS = {
+        SUBMIT_DATA = {
+            position = {0, 2, 0},
+            rotation = {-40, 0, 0},
+            width = 5000,
+            height = 1400,
+            font_size = 600
+        }
+    },
+    
+    -- OBJECT REFERENCES (by name)
+    OBJECTS = {
+        ROUND_TRACKER = "RoundTracker",
+        BLUE_SCORE_TRACKER = "BluePlayerScoreTracker",
+        RED_SCORE_TRACKER = "RedPlayerScoreTracker"
+    },
+    
+    -- ZONE NAMES for deck collection
+    ZONES = {
+        BLUE_DECK = "BluePlayerDeckZone",
+        BLUE_DISCARD = "BluePlayerDiscardZone",
+        RED_DECK = "RedPlayerDeckZone",
+        RED_DISCARD = "RedPlayerDiscardZone"
+    },
+    
+    -- BOARD LAYOUT
+    -- X-axis threshold to determine Blue vs Red side
+    -- Blue player typically on negative X side, Red on positive X side
+    -- Adjust this value based on your actual board layout
+    BOARD_CENTER_X = 0,
+    
+    -- =========================================================================
+    -- FACTION REGISTRY
+    -- To add a new faction:
+    -- 1. Add an entry to FACTIONS with the faction's full name and short code
+    -- 2. Add all champion GUIDs for that faction to CHAMPIONS
+    -- =========================================================================
+    FACTIONS = {
+        ["Leafsong"] = "Leafsong Nomads",
+        ["Boulderbreaker"] = "Boulderbreaker Clans"
+        -- Future factions:
+        -- ["NewFaction"] = "New Faction Full Name",
+    },
+    
+    -- CHAMPION MAPPING (GUID -> Name and Faction short code)
+    -- Champions are used as the primary method to detect which faction each player has
+    -- Their physical position on the board determines Blue vs Red assignment
+    CHAMPIONS = {
+        -- Leafsong Nomads
+        ["61b8dd"] = {name = "Loresinger", faction = "Leafsong"},
+        ["efde51"] = {name = "HighSpiritseer", faction = "Leafsong"},
+        ["29d6aa"] = {name = "BonebladeAlpha", faction = "Leafsong"},
+        ["e8876b"] = {name = "Wyldspeaker", faction = "Leafsong"},
+        ["2010f2"] = {name = "WyrdbowSentinel", faction = "Leafsong"},
+        -- Boulderbreaker Clans
+        ["114058"] = {name = "UrscarKing", faction = "Boulderbreaker"},
+        ["8e909d"] = {name = "FellcastHunter", faction = "Boulderbreaker"},
+        ["3e612a"] = {name = "MakaraElder", faction = "Boulderbreaker"},
+        ["904e31"] = {name = "OutcastKingsguard", faction = "Boulderbreaker"},
+        ["b2a890"] = {name = "Painseeker", faction = "Boulderbreaker"}
+        -- Future faction champions:
+        -- ["guid"] = {name = "ChampionName", faction = "NewFaction"},
+    }
+}
+
+-- ======================
+-- STATE VARIABLES
+-- ======================
+local state = {
+    popupOpen = false,
+    previousUI = nil,
+    buttonVisible = false  -- Button starts hidden, shows when game ends
+}
+
+-- Form data storage (populated by UI callbacks)
+local formData = {
+    cardFeedback = "",
+    generalFeedback = ""
+}
+
+-- ======================
+-- OBJECT REFERENCES
+-- ======================
+local objectRefs = {
+    roundTracker = nil,
+    blueScoreTracker = nil,
+    redScoreTracker = nil
+}
+
+-- ======================
+-- INITIALIZATION
+-- ======================
+function onLoad(savedData)
+    -- Find required objects
+    findRequiredObjects()
+    
+    -- Create the main UI button
+    createMainUI()
+end
+
+-- Save state (minimal - form data not saved)
+function onSave()
+    return ""
+end
+
+-- ======================
+-- OBJECT FINDING
+-- ======================
+function findRequiredObjects()
+    local allObjects = getAllObjects()
+    
+    for _, obj in ipairs(allObjects) do
+        local name = obj.getName()
+        
+        if name == CONFIG.OBJECTS.ROUND_TRACKER then
+            objectRefs.roundTracker = obj
+        elseif name == CONFIG.OBJECTS.BLUE_SCORE_TRACKER then
+            objectRefs.blueScoreTracker = obj
+        elseif name == CONFIG.OBJECTS.RED_SCORE_TRACKER then
+            objectRefs.redScoreTracker = obj
+        end
+    end
+end
+
+-- ======================
+-- UI CREATION
+-- ======================
+function createMainUI()
+    self.clearButtons()
+    
+    -- Only create button if it should be visible
+    if state.buttonVisible then
+        -- Submit Playtest Data button
+        self.createButton({
+            click_function = "onSubmitDataClicked",
+            function_owner = self,
+            label = "Submit\nPlaytest Data",
+            position = CONFIG.BUTTON_POSITIONS.SUBMIT_DATA.position,
+            rotation = CONFIG.BUTTON_POSITIONS.SUBMIT_DATA.rotation,
+            width = CONFIG.BUTTON_POSITIONS.SUBMIT_DATA.width,
+            height = CONFIG.BUTTON_POSITIONS.SUBMIT_DATA.height,
+            font_size = CONFIG.BUTTON_POSITIONS.SUBMIT_DATA.font_size,
+            color = CONFIG.COLORS.GREEN,
+            font_color = CONFIG.COLORS.WHITE,
+            tooltip = "Open feedback form and submit playtest data"
+        })
+    end
+end
+
+-- ======================
+-- FEEDBACK POPUP
+-- ======================
+function onSubmitDataClicked(obj, playerColor, altClick)
+    if state.popupOpen then
+        broadcastToAll("Feedback form is already open!", CONFIG.COLORS.RED)
+        return
+    end
+    
+    openFeedbackPopup(playerColor)
+end
+
+function openFeedbackPopup(playerColor)
+    local current = Global.UI.getXml() or ""
+    state.previousUI = current
+    state.popupOpen = true
+    
+    local guid = self.getGUID()
+    
+    local xml = string.format([[
+        <Panel id="gameTrackerPopup" width="500" height="480" rectAlignment="MiddleCenter" allowDragging="true" color="#1a1a1aEE">
+            <VerticalLayout spacing="8" padding="15">
+                <!-- Header -->
+                <Text text="Submit Playtest Data" fontSize="24" fontStyle="Bold" color="#FFD700" alignment="MiddleCenter" />
+                
+                <!-- Divider -->
+                <Panel preferredHeight="2" color="#444444" />
+                
+                <!-- Card Feedback -->
+                <Text text="Cards that stood out as too weak or powerful:" fontSize="14" color="#CCCCCC" alignment="MiddleLeft" />
+                <InputField id="gtCardFeedback" 
+                    placeholder="Enter card feedback here..." 
+                    lineType="MultiLineNewline" 
+                    preferredHeight="80"
+                    onValueChanged="%s/onCardFeedbackChanged"
+                    textColor="#FFFFFF"
+                    colors="#333333|#444444|#555555|#333333" />
+                
+                <!-- General Feedback -->
+                <Text text="General Feedback:" fontSize="14" color="#CCCCCC" alignment="MiddleLeft" />
+                <InputField id="gtGeneralFeedback" 
+                    placeholder="Enter general feedback here..." 
+                    lineType="MultiLineNewline" 
+                    preferredHeight="100"
+                    onValueChanged="%s/onGeneralFeedbackChanged"
+                    textColor="#FFFFFF"
+                    colors="#333333|#444444|#555555|#333333" />
+                
+                <!-- Info Text -->
+                <Text text="Game data (round, factions, decks, scores, champions) will be automatically collected and submitted." fontSize="11" color="#888888" alignment="MiddleCenter" fontStyle="Italic" />
+                
+                <!-- Buttons -->
+                <HorizontalLayout spacing="10" preferredHeight="50" padding="5">
+                    <Button text="Submit Data" onClick="%s/onFormSubmit" 
+                        preferredWidth="150" preferredHeight="40"
+                        colors="#2d7a2d|#3d9a3d|#1d5a1d|#2d7a2d"
+                        textColor="#FFFFFF" fontSize="16" fontStyle="Bold" />
+                    <Button text="Cancel" onClick="%s/onFormCancel" 
+                        preferredWidth="150" preferredHeight="40"
+                        colors="#7a2d2d|#9a3d3d|#5a1d1d|#7a2d2d"
+                        textColor="#FFFFFF" fontSize="16" />
+                </HorizontalLayout>
+            </VerticalLayout>
+        </Panel>
+    ]], guid, guid, guid, guid)
+    
+    Global.UI.setXml(current .. xml)
+    broadcastToAll("Feedback form opened. Fill in your feedback and click Submit.", {0.8, 0.8, 0.2})
+end
+
+function closeFeedbackPopup()
+    if state.previousUI then
+        Global.UI.setXml(state.previousUI)
+        state.previousUI = nil
+    end
+    state.popupOpen = false
+    
+    -- Clear form data
+    formData.cardFeedback = ""
+    formData.generalFeedback = ""
+end
+
+-- UI Callbacks for form fields
+function onCardFeedbackChanged(player, value, id)
+    formData.cardFeedback = value or ""
+end
+
+function onGeneralFeedbackChanged(player, value, id)
+    formData.generalFeedback = value or ""
+end
+
+function onFormCancel(player, value, id)
+    closeFeedbackPopup()
+    broadcastToAll("Feedback submission cancelled.", {0.8, 0.5, 0.2})
+end
+
+function onFormSubmit(player, value, id)
+    -- Collect all game data
+    local gameData = collectGameData()
+    
+    -- Add feedback to the data
+    gameData.feedback = {
+        cardFeedback = formData.cardFeedback,
+        generalFeedback = formData.generalFeedback
+    }
+    
+    -- Compress and send the data
+    sendPlaytestData(gameData, player)
+    
+    closeFeedbackPopup()
+end
+
+-- ======================
+-- DATA COLLECTION
+-- ======================
+function collectGameData()
+    local data = {
+        timestamp = os.date("%Y-%m-%d %H:%M:%S"),
+        roundEnded = getCurrentRound(),
+        factions = {}
+    }
+    
+    -- Collect Blue player data
+    local blueData = collectPlayerData("Blue")
+    if blueData then
+        data.factions[blueData.faction] = data.factions[blueData.faction] or {}
+        table.insert(data.factions[blueData.faction], {
+            player = "Blue",
+            playerName = blueData.playerName,
+            deck = blueData.deck,
+            finalScore = blueData.score,
+            champions = blueData.champions
+        })
+    end
+    
+    -- Collect Red player data
+    local redData = collectPlayerData("Red")
+    if redData then
+        data.factions[redData.faction] = data.factions[redData.faction] or {}
+        table.insert(data.factions[redData.faction], {
+            player = "Red",
+            playerName = redData.playerName,
+            deck = redData.deck,
+            finalScore = redData.score,
+            champions = redData.champions
+        })
+    end
+    
+    return data
+end
+
+function getCurrentRound()
+    -- Try to get round from RoundTracker using the API function
+    if objectRefs.roundTracker then
+        -- Use the getCurrentRound API function
+        local success, result = pcall(function()
+            return objectRefs.roundTracker.call("getCurrentRound")
+        end)
+        if success and result then
+            return result
+        end
+        
+        -- Alternative: Try to get full game state
+        local stateSuccess, stateResult = pcall(function()
+            return objectRefs.roundTracker.call("getGameState")
+        end)
+        if stateSuccess and stateResult and stateResult.currentRound then
+            return stateResult.currentRound
+        end
+    end
+    
+    -- Default to unknown
+    return "Unknown"
+end
+
+function collectPlayerData(playerColor)
+    local data = {
+        player = playerColor,
+        playerName = "Unknown",
+        faction = "Unknown",
+        deck = {},
+        score = 0,
+        champions = {}
+    }
+    
+    -- Get player name from score tracker
+    data.playerName = getPlayerSteamName(playerColor)
+    
+    -- Get faction from score tracker image or detect from champions
+    data.faction = detectPlayerFaction(playerColor)
+    
+    -- Get score
+    data.score = getPlayerScore(playerColor)
+    
+    -- Get deck cards from zones
+    data.deck = collectDeckCards(playerColor)
+    
+    -- Get champion data
+    data.champions = collectChampionData(data.faction)
+    
+    return data
+end
+
+function getPlayerSteamName(playerColor)
+    local tracker = nil
+    if playerColor == "Blue" then
+        tracker = objectRefs.blueScoreTracker
+    elseif playerColor == "Red" then
+        tracker = objectRefs.redScoreTracker
+    end
+    
+    if tracker then
+        local name = tracker.call("getPlayerName")
+        if name and name ~= "" then
+            return name
+        end
+    end
+    return "Unknown"
+end
+
+function detectPlayerFaction(playerColor)
+    -- ==========================================================================
+    -- CHAMPION-BASED FACTION DETECTION
+    -- ==========================================================================
+    -- This is the PRIMARY and most reliable method for detecting which faction
+    -- each player has. It works by:
+    -- 1. Finding all champions currently on the board
+    -- 2. Grouping them by faction
+    -- 3. Calculating the average X position of each faction's champions
+    -- 4. The faction on the Blue side (negative X) belongs to Blue player
+    -- 5. The faction on the Red side (positive X) belongs to Red player
+    --
+    -- This method is reliable because:
+    -- - Champions are persistent physical objects
+    -- - Their position survives table saves/reloads
+    -- - No stored state that can be lost
+    -- ==========================================================================
+    
+    -- Group champions by faction and calculate average X position
+    local factionPositions = {}  -- {factionCode = {totalX = 0, count = 0, champions = {}}}
+    
+    for guid, champInfo in pairs(CONFIG.CHAMPIONS) do
+        local champObj = getObjectFromGUID(guid)
+        if champObj and not champObj.isDestroyed() then
+            local pos = champObj.getPosition()
+            local factionCode = champInfo.faction
+            
+            if not factionPositions[factionCode] then
+                factionPositions[factionCode] = {totalX = 0, count = 0, champions = {}}
+            end
+            
+            factionPositions[factionCode].totalX = factionPositions[factionCode].totalX + pos.x
+            factionPositions[factionCode].count = factionPositions[factionCode].count + 1
+            table.insert(factionPositions[factionCode].champions, champInfo.name)
+        end
+    end
+    
+    -- Calculate average X for each faction and determine which is on which side
+    local factionSides = {}  -- {factionCode = "Blue" or "Red"}
+    
+    for factionCode, data in pairs(factionPositions) do
+        if data.count > 0 then
+            local avgX = data.totalX / data.count
+            local side = avgX < CONFIG.BOARD_CENTER_X and "Blue" or "Red"
+            factionSides[factionCode] = side
+        end
+    end
+    
+    -- Find which faction is on this player's side
+    for factionCode, side in pairs(factionSides) do
+        if side == playerColor then
+            local factionFullName = CONFIG.FACTIONS[factionCode] or factionCode
+            return factionFullName
+        end
+    end
+    
+    print("[GameTracker] WARNING: Could not detect faction for " .. playerColor .. " player")
+    return "Unknown"
+end
+
+function getPlayerHandObjects(playerColor)
+    local player = Player[playerColor]
+    if player and player.getHandObjects then
+        return player.getHandObjects() or {}
+    end
+    return {}
+end
+
+function getPlayerScore(playerColor)
+    local tracker = playerColor == "Blue" and objectRefs.blueScoreTracker or objectRefs.redScoreTracker
+    
+    if tracker then
+        -- Try to call calculateTotalVP function
+        local success, result = pcall(function()
+            return tracker.call("calculateTotalVP")
+        end)
+        if success and result then
+            return result
+        end
+        
+        -- Alternative: Try to get scoreState directly
+        local scoreState = tracker.getVar("scoreState")
+        if scoreState then
+            local total = 0
+            total = total + (scoreState.woodwispCount or 0)
+            for _, slain in ipairs(scoreState.championsSlain or {}) do
+                if slain then total = total + 3 end
+            end
+            if scoreState.leaderSlain then total = total + 5 end
+            total = total + (scoreState.otherCount or 0)
+            return total
+        end
+    end
+    
+    return 0
+end
+
+function collectDeckCards(playerColor)
+    local cards = {}
+    -- NOTE: Duplicates are intentionally allowed to track card quantities
+    -- (e.g., 3x Savage Rend will appear 3 times in the list)
+    
+    local deckZoneName, discardZoneName
+    if playerColor == "Blue" then
+        deckZoneName = CONFIG.ZONES.BLUE_DECK
+        discardZoneName = CONFIG.ZONES.BLUE_DISCARD
+    else
+        deckZoneName = CONFIG.ZONES.RED_DECK
+        discardZoneName = CONFIG.ZONES.RED_DISCARD
+    end
+    
+    -- Find zones by name
+    local deckZone, discardZone = nil, nil
+    local allObjects = getAllObjects()
+    
+    for _, obj in ipairs(allObjects) do
+        local name = obj.getName()
+        if name == deckZoneName then
+            deckZone = obj
+        elseif name == discardZoneName then
+            discardZone = obj
+        end
+    end
+    
+    -- Helper function to get cards from a zone (includes duplicates)
+    local function getCardsFromZone(zone)
+        if not zone then return end
+        
+        local zoneObjects = zone.getObjects()
+        for _, obj in ipairs(zoneObjects or {}) do
+            if obj.type == "Card" then
+                local cardName = obj.getName()
+                if cardName and cardName ~= "" then
+                    table.insert(cards, cardName)
+                end
+            elseif obj.type == "Deck" then
+                -- Get cards from deck (each card instance counted separately)
+                local deckObjects = obj.getObjects()
+                for _, cardInfo in ipairs(deckObjects or {}) do
+                    local cardName = cardInfo.name or cardInfo.nickname
+                    if cardName and cardName ~= "" then
+                        table.insert(cards, cardName)
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Collect from deck zone
+    getCardsFromZone(deckZone)
+    
+    -- Collect from discard zone
+    getCardsFromZone(discardZone)
+    
+    -- Also check player's hand
+    local handCards = getPlayerHandObjects(playerColor)
+    for _, obj in ipairs(handCards) do
+        if obj.type == "Card" then
+            local cardName = obj.getName()
+            if cardName and cardName ~= "" then
+                table.insert(cards, cardName)
+            end
+        end
+    end
+    
+    return cards
+end
+
+function collectChampionData(factionName)
+    local champions = {}
+    
+    -- Determine which faction we're looking for
+    local targetFaction = nil
+    if string.find(string.lower(factionName), "leafsong") then
+        targetFaction = "Leafsong"
+    elseif string.find(string.lower(factionName), "boulderbreaker") or string.find(string.lower(factionName), "boulder") then
+        targetFaction = "Boulderbreaker"
+    end
+    
+    for guid, champInfo in pairs(CONFIG.CHAMPIONS) do
+        -- Filter by faction if specified
+        if not targetFaction or champInfo.faction == targetFaction then
+            local champObj = getObjectFromGUID(guid)
+            if champObj and not champObj.isDestroyed() then
+                -- Try to use the getChampionData API function first
+                local success, champData = pcall(function()
+                    return champObj.call("getChampionData")
+                end)
+                
+                if success and champData then
+                    champions[champData.name or champInfo.name] = {
+                        health = champData.health or 0,
+                        maxHealth = champData.maxHealth or 0,
+                        woodwisps = champData.woodwisps or 0
+                    }
+                else
+                    -- Fallback: try individual getter functions
+                    local health = 0
+                    local woodwispCount = 0
+                    
+                    local healthSuccess, healthResult = pcall(function()
+                        return champObj.call("getHealth")
+                    end)
+                    if healthSuccess and healthResult then
+                        health = healthResult
+                    else
+                        -- Last resort: try getVar (may not work for local variables)
+                        health = champObj.getVar("health") or 0
+                    end
+                    
+                    local wwSuccess, wwResult = pcall(function()
+                        return champObj.call("getWoodwispCount")
+                    end)
+                    if wwSuccess and wwResult then
+                        woodwispCount = wwResult
+                    else
+                        -- Fallback: count woodwispsOnCard table
+                        local woodwispsOnCard = champObj.getVar("woodwispsOnCard") or {}
+                        for _ in pairs(woodwispsOnCard) do
+                            woodwispCount = woodwispCount + 1
+                        end
+                    end
+                    
+                    champions[champInfo.name] = {
+                        health = health,
+                        woodwisps = woodwispCount
+                    }
+                end
+            end
+        end
+    end
+    
+    return champions
+end
+
+-- ======================
+-- DATA COMPRESSION & TRANSMISSION
+-- ======================
+function compressGameData(data)
+    -- Create a compact representation of the data
+    -- Format: r=round|f=faction:p=player,d=deck1;deck2,s=score,c=champ1:h:w;champ2:h:w|...
+    
+    local parts = {}
+    
+    -- Round
+    table.insert(parts, "r=" .. tostring(data.roundEnded))
+    
+    -- Timestamp (shortened)
+    table.insert(parts, "t=" .. (data.timestamp or ""))
+    
+    -- Factions data
+    for factionName, players in pairs(data.factions or {}) do
+        for _, playerData in ipairs(players) do
+            local factionPart = {}
+            
+            -- Faction abbreviation
+            local fAbbr = string.find(string.lower(factionName), "leafsong") and "LS" or "BB"
+            table.insert(factionPart, "f=" .. fAbbr)
+            
+            -- Player color abbreviation
+            local pAbbr = playerData.player == "Blue" and "B" or "R"
+            table.insert(factionPart, "p=" .. pAbbr)
+            
+            -- Score
+            table.insert(factionPart, "s=" .. tostring(playerData.finalScore or 0))
+            
+            -- Deck (abbreviated card names, semicolon separated)
+            local deckAbbr = {}
+            for _, cardName in ipairs(playerData.deck or {}) do
+                -- Take first 10 chars of card name
+                table.insert(deckAbbr, string.sub(cardName, 1, 10))
+            end
+            table.insert(factionPart, "d=" .. table.concat(deckAbbr, ";"))
+            
+            -- Champions (name:health:woodwisps)
+            local champParts = {}
+            for champName, champData in pairs(playerData.champions or {}) do
+                table.insert(champParts, string.format("%s:%d:%d", 
+                    string.sub(champName, 1, 6), 
+                    champData.health or 0, 
+                    champData.woodwisps or 0))
+            end
+            table.insert(factionPart, "c=" .. table.concat(champParts, ";"))
+            
+            table.insert(parts, table.concat(factionPart, ","))
+        end
+    end
+    
+    -- Feedback (if present)
+    if data.feedback then
+        if data.feedback.cardFeedback and data.feedback.cardFeedback ~= "" then
+            table.insert(parts, "cf=" .. urlEncode(data.feedback.cardFeedback))
+        end
+        if data.feedback.generalFeedback and data.feedback.generalFeedback ~= "" then
+            table.insert(parts, "gf=" .. urlEncode(data.feedback.generalFeedback))
+        end
+    end
+    
+    return table.concat(parts, "|")
+end
+
+function sendPlaytestData(data, player)
+    -- Format data for Google Sheets
+    local sheetsPayload = formatForGoogleSheets(data)
+    local jsonData = JSON.encode(sheetsPayload)
+    
+    -- Log what we're sending
+    print("[GameTracker] Submitting playtest data to Google Sheets...")
+    print("[GameTracker] Payload size: " .. string.len(jsonData) .. " bytes")
+    
+    -- Send via WebRequest
+    WebRequest.custom(CONFIG.WEBHOOK_URL, "POST", true, jsonData, {["Content-Type"] = "application/json"}, function(response)
+        if response.is_error then
+            broadcastToAll("Error submitting data: " .. (response.error or "Unknown error"), {1, 0.2, 0.2})
+            print("[GameTracker] WebRequest error: " .. tostring(response.error))
+            print("[GameTracker] Response code: " .. tostring(response.response_code))
+            print("[GameTracker] Response text: " .. tostring(response.text))
+        else
+            broadcastToAll("Playtest data submitted successfully! Thank you for your feedback!", {0.2, 0.8, 0.2})
+            print("[GameTracker] Data submitted successfully to Google Sheets")
+            print("[GameTracker] Response: " .. tostring(response.text))
+        end
+    end)
+    
+    -- Also print a summary to the console
+    printDataSummary(data)
+end
+
+-- ======================
+-- GOOGLE SHEETS FORMATTING
+-- ======================
+-- Formats data into a FACTION-CENTRIC structure optimized for analysis
+-- Key design: FactionResults has ONE ROW PER FACTION per game
+-- This makes it easy to filter by faction name (e.g., "show all Leafsong games")
+-- Creates separate arrays for: Games (match metadata), FactionResults, DeckCards, Champions
+function formatForGoogleSheets(data)
+    -- Generate a unique game ID based on timestamp
+    local gameId = os.date("%Y%m%d%H%M%S") .. "_" .. math.random(1000, 9999)
+    local timestamp = data.timestamp or os.date("%Y-%m-%d %H:%M:%S")
+    
+    -- Build faction data first so we can determine winner
+    local factionResults = {}  -- {factionName = {score=X, deckSize=Y}}
+    
+    for factionName, players in pairs(data.factions or {}) do
+        for _, playerData in ipairs(players) do
+            factionResults[factionName] = {
+                playerName = playerData.playerName or "Unknown",
+                score = playerData.finalScore or 0,
+                deckSize = #(playerData.deck or {}),
+                deck = playerData.deck or {},
+                champions = playerData.champions or {}
+            }
+        end
+    end
+    
+    -- Determine winner
+    local winner = "Tie"
+    local highScore = -1
+    local tiedFactions = {}
+    
+    for factionName, fData in pairs(factionResults) do
+        if fData.score > highScore then
+            highScore = fData.score
+            winner = factionName
+            tiedFactions = {factionName}
+        elseif fData.score == highScore then
+            table.insert(tiedFactions, factionName)
+        end
+    end
+    
+    if #tiedFactions > 1 then
+        winner = "Tie"
+    end
+    
+    local payload = {
+        gameId = gameId,
+        
+        -- GAMES sheet data (one row per match - metadata only)
+        game = {
+            gameId = gameId,
+            timestamp = timestamp,
+            roundEnded = tonumber(data.roundEnded) or 0,
+            winner = winner,
+            cardFeedback = (data.feedback and data.feedback.cardFeedback) or "",
+            generalFeedback = (data.feedback and data.feedback.generalFeedback) or ""
+        },
+        
+        -- FACTION_RESULTS sheet data (ONE ROW PER FACTION per game)
+        -- Easy to filter: "Show me all Leafsong Nomads games"
+        factionResults = {},
+        
+        -- DECK_CARDS sheet data (one row per card per faction)
+        deckCards = {},
+        
+        -- CHAMPIONS sheet data (one row per champion)
+        champions = {}
+    }
+    
+    -- Build faction results and related data
+    for factionName, fData in pairs(factionResults) do
+        -- Find opponent faction and score
+        local opponentFaction = "None"
+        local opponentScore = 0
+        for otherFaction, otherData in pairs(factionResults) do
+            if otherFaction ~= factionName then
+                opponentFaction = otherFaction
+                opponentScore = otherData.score
+                break
+            end
+        end
+        
+        -- Add faction result row (one per faction per game)
+        table.insert(payload.factionResults, {
+            gameId = gameId,
+            timestamp = timestamp,
+            faction = factionName,            playerName = fData.playerName,            score = fData.score,
+            deckSize = fData.deckSize,
+            isWinner = (winner == factionName),
+            opponent = opponentFaction,
+            opponentScore = opponentScore
+        })
+        
+        -- Add deck cards
+        for _, cardName in ipairs(fData.deck) do
+            table.insert(payload.deckCards, {
+                gameId = gameId,
+                timestamp = timestamp,
+                faction = factionName,
+                cardName = cardName
+            })
+        end
+        
+        -- Add champion data
+        for champName, champData in pairs(fData.champions) do
+            table.insert(payload.champions, {
+                gameId = gameId,
+                timestamp = timestamp,
+                faction = factionName,
+                championName = champName,
+                finalHealth = champData.health or 0,
+                maxHealth = champData.maxHealth or 0,
+                woodwisps = champData.woodwisps or 0,
+                isDead = (champData.health or 0) <= 0
+            })
+        end
+    end
+    
+    return payload
+end
+
+function printDataSummary(data)
+    print("========== PLAYTEST DATA SUMMARY ==========")
+    print("Timestamp: " .. (data.timestamp or "N/A"))
+    print("Round Ended: " .. tostring(data.roundEnded))
+    print("")
+    
+    for factionName, players in pairs(data.factions or {}) do
+        for _, playerData in ipairs(players) do
+            print("--- " .. factionName .. " (" .. playerData.player .. " Player) ---")
+            print("  Final Score: " .. tostring(playerData.finalScore))
+            print("  Deck Cards: " .. #(playerData.deck or {}))
+            for i, card in ipairs(playerData.deck or {}) do
+                print("    " .. i .. ". " .. card)
+            end
+            print("  Champions:")
+            for champName, champData in pairs(playerData.champions or {}) do
+                print(string.format("    %s: Health=%d, Woodwisps=%d", 
+                    champName, champData.health or 0, champData.woodwisps or 0))
+            end
+            print("")
+        end
+    end
+    
+    if data.feedback then
+        print("--- FEEDBACK ---")
+        if data.feedback.cardFeedback and data.feedback.cardFeedback ~= "" then
+            print("Card Feedback: " .. data.feedback.cardFeedback)
+        end
+        if data.feedback.generalFeedback and data.feedback.generalFeedback ~= "" then
+            print("General Feedback: " .. data.feedback.generalFeedback)
+        end
+    end
+    
+    print("============================================")
+end
+
+-- ======================
+-- UTILITY FUNCTIONS
+-- ======================
+function urlEncode(str)
+    if not str then return "" end
+    str = tostring(str)
+    str = str:gsub("\n", " ")
+    str = str:gsub("([^%w%-_.~])", function(c)
+        return string.format("%%%02X", string.byte(c))
+    end)
+    return str
+end
+
+function doNothing()
+    -- Placeholder for non-clickable buttons
+end
+
+-- ======================
+-- EXTERNAL API
+-- ======================
+-- Functions that can be called from other objects
+
+-- Get current game data without submitting
+function getGameData()
+    return collectGameData()
+end
+
+-- Manually trigger data submission
+function submitData(params)
+    local gameData = collectGameData()
+    if params and params.feedback then
+        gameData.feedback = params.feedback
+    end
+    sendPlaytestData(gameData, nil)
+    return gameData
+end
+
+-- Show the Submit Playtest Data button (called when game ends)
+function showSubmitButton()
+    print("[GameTracker] Showing Submit Playtest Data button")
+    state.buttonVisible = true
+    createMainUI()
+    broadcastToAll("Submit Playtest Data button is now available!", CONFIG.COLORS.GREEN)
+end
+
+-- Hide the Submit Playtest Data button (called when game resets)
+function hideSubmitButton()
+    print("[GameTracker] Hiding Submit Playtest Data button")
+    state.buttonVisible = false
+    createMainUI()
+end
