@@ -1,0 +1,21 @@
+United Colonies of Mankind - UCM Tester - [491 pts]
+
+# ++ Fleet ++ [491 pts]
+## Configuration
+Game Size: Battle
+
+## Admirals [25 pts]
+Lvl 1: Captain [25 pts]
+
+## Heavy Groups [180 pts]
+Johannesburg Battlecruiser [180 pts]: UF-6400 Mass Driver Twin Turrets, UF-4200 Mass Driver Turrets, Fighters & Bombers
+
+## Medium Groups [220 pts]
+Berlin Cruisers [80 pts]:
+• 1x Berlin Cruiser [80 pts]: Cobra Heavy Laser, UF-4200 Mass Driver Turrets
+New Cairo Light Cruisers [140 pts]:
+• 2x New Cairo Light Cruiser [70 pts]: Cobra Heavy Laser
+
+## Light Groups [66 pts]
+Vienna Escort Frigates [66 pts]:
+• 1x Vienna Escort Frigate [66 pts]: Mamba Laser

@@ -1,0 +1,21 @@
+Resistance - Resist Test - [751 pts]
+
+# ++ Fleet ++ [751 pts]
+## Configuration
+Game Size: Clash
+
+## Admirals [65 pts]
+Lvl 3: Artificer [65 pts]: Final Mission
+
+## Heavy Groups [245 pts]
+Drake Grand Battleship [245 pts]: Spinal Mass Annihilator, NC-16 Missile Battery Turret Pair, 2x Heavy Vent Cannon Turret
+
+## Medium Groups [270 pts]
+Kalium KNC-12 Line Cruisers [270 pts]:
+• 2x Kalium KNC-12 Line Cruiser [135 pts]: 2x Fighters & Bombers [40 pts], Vent Cannon Turret [10 pts]
+
+## Light Groups [171 pts]
+Heavy Frigates [126 pts]:
+• 3x Heavy Frigate [42 pts]: NC-16 Missile Turret [5 pts], Light Vent Cannon Turret [5 pts]
+Strike Carriers [45 pts]:
+• 1x Strike Carrier [45 pts]: Sensor Dome [10 pts], Dropships

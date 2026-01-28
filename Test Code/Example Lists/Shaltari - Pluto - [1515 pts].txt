@@ -1,0 +1,37 @@
+Shaltari - Pluto - [1515 pts]
+
+# ++ Fleet ++ [1515 pts]
+## Configuration
+Game Size: Clash
+
+## Admirals [65 pts]
+Lvl 3: Starchief [65 pts]
+
+## Heavy Groups [230 pts]
+Diamond Battleship [230 pts]: Disintegrator Battery, Particle Lance Triad, Dropships
+
+## Medium Groups [560 pts]
+Citrine Motherships [130 pts]:
+• 1x Citrine Mothership [130 pts]: 2x Disintegrator Battery, Dropships
+Jet Heavy Cruiser [115 pts]: Ion Aura & Ion Storm, Disintegrator Battery
+Obsidian Heavy Cruiser [135 pts]: 3x Particle Lance
+Turquoise Cruisers [180 pts]:
+• 2x Turquoise Cruiser [90 pts]: Ion Aura & Ion Storm
+
+## Light Groups [660 pts]
+Glass Cloudflyers [80 pts]:
+• 4x Glass Cloudflyer [20 pts]: Ion Lance
+Glass Cloudflyers [60 pts]:
+• 3x Glass Cloudflyer [20 pts]: Ion Lance
+Iridium Destroyers [180 pts]:
+• 3x Iridium Destroyer [60 pts]: Disruption Beamers, Kinetic Lance
+Opal Shielding Frigates [45 pts]:
+• 1x Opal Shielding Frigate [45 pts]: Harpoon Strike
+Opal Shielding Frigates [45 pts]:
+• 1x Opal Shielding Frigate [45 pts]: Harpoon Strike
+Selenium Heavy Voidgates [110 pts]:
+• 2x Selenium Heavy Voidgate [55 pts]: Defence Array, Charged Air
+Selenium Heavy Voidgates [110 pts]:
+• 2x Selenium Heavy Voidgate [55 pts]: Defence Array, Charged Air
+Voidgates [30 pts]:
+• 2x Voidgate [15 pts]

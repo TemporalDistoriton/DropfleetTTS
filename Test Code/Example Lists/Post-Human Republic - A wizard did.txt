@@ -1,0 +1,28 @@
+Post-Human Republic - A wizard did it - [1535 pts]
+
+# ++ Fleet ++ [1535 pts]
+## Configuration
+Game Size: Clash
+
+## Famous Admirals [200 pts]
+Lvl 2: Helena of Asgard - Pompeius [200 pts]:
+• 1x Helena of Asgard [60 pts]
+• 1x Pompeius Battlecruiser [140 pts]: Heavy Quad Battery
+
+## Heavy Groups [420 pts]
+Kairos Battleship [210 pts]: Laser Multi-Lance, Neutron Missiles
+Kairos Battleship [210 pts]: Laser Multi-Lance, Neutron Missiles
+
+## Medium Groups [615 pts]
+Bellerophon Heavy Cruiser [185 pts]: Twin Supernova Laser, Fighters & Bombers
+Orpheus Assault Troopship [170 pts]: 2x Light Calibre Broadside, Supernova Laser, Bulk Landers
+Teucer Cruisers [260 pts]:
+• 2x Teucer Cruiser [130 pts]: Medium Calibre Broadside, Heavy Calibre Broadside, Supernova Laser
+
+## Light Groups [300 pts]
+Medea Strike Carriers [100 pts]:
+• 2x Medea Strike Carrier [50 pts]: Bombardment Turret, Dropships
+Medea Strike Carriers [100 pts]:
+• 2x Medea Strike Carrier [50 pts]: Bombardment Turret, Dropships
+Medea Strike Carriers [100 pts]:
+• 2x Medea Strike Carrier [50 pts]: Bombardment Turret, Dropships

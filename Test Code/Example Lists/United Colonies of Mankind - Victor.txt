@@ -1,0 +1,29 @@
+United Colonies of Mankind - Victoria Expendition Fleet - [1933 pts]
+
+# ++ Fleet ++ [1933 pts]
+## Configuration
+Game Size: Skirmish
+
+## Heavy Groups [650 pts]
+Babylon Super Battleship [325 pts]: Python Super Heavy Laser, UF-6400 Mass Driver Turret Triad, Fighters & Bombers, Heavy Bombers, Medium Torpedo, UF-4200 Mass Driver Turrets (2x UF-4200 Mass Driver Turrets)
+Byzantium Super Battleship [325 pts]: Python Super Heavy Laser, UF-B-8000 Bombardment Turrets, Fighters & Bombers, Heavy Bombers, Medium Torpedo, UF-4200 Mass Driver Turrets (2x UF-4200 Mass Driver Turrets)
+
+## Medium Groups [1283 pts]
+Boston Light Cruisers [150 pts]:
+• 2x Boston Light Cruiser [75 pts]: Piranha Missile Turrets, Medium Torpedo
+Bruges Cruisers [84 pts]:
+• 1x Bruges Cruiser [84 pts]: Cobra Heavy Laser, Taipan Laser Turrets
+Bucharest Cruisers [90 pts]:
+• 1x Bucharest Cruiser [90 pts]: Taipan Laser Turrets, Piranha Missile Turrets, Medium Torpedo
+Edmonton Heavy Carrier [135 pts]: Cobra Heavy Laser, UF-6400 Mass Driver Turrets, Fighters & Bombers
+Edmonton Heavy Carrier [135 pts]: Cobra Heavy Laser, UF-6400 Mass Driver Turrets, Fighters & Bombers
+Edmonton Heavy Carrier [135 pts]: Cobra Heavy Laser, UF-6400 Mass Driver Turrets, Fighters & Bombers
+Glasgow Cruisers [98 pts]:
+• 1x Glasgow Cruiser [98 pts]: UF-B-8000 Bombardment Turret Pair, Arowana Missile Turrets
+Las Vegas Command Carrier [145 pts]: UF-6400 Mass Driver Turrets, Fighters & Bombers
+Madrid Cruisers [86 pts]:
+• 1x Madrid Cruiser [86 pts]: UF-B-8000 Bombardment Turret Pair, UF-4200 Mass Driver Turrets
+Osaka Light Cruisers [140 pts]:
+• 2x Osaka Light Cruiser [70 pts]: UF-6400 Mass Driver Turrets
+Rio Cruisers [85 pts]:
+• 1x Rio Cruiser [85 pts]: UF-6400 Mass Driver Turrets, UF-4200 Mass Driver Turrets

@@ -1,0 +1,26 @@
+Scourge - Scourge Rush - [1500 pts]
+
+# ++ Fleet ++ [1500 pts]
+## Configuration
+Game Size: Clash
+
+## Famous Admirals [285 pts]
+Lvl 3: Flayer - Shadow [285 pts]:
+• 1x Flayer [65 pts]
+• 1x Shadow Battlecruiser [220 pts]: Oculus Beam Array, Magneton Lash, Plasma Tempest, Fighters & Bombers
+
+## Medium Groups [518 pts]
+Chimera Troopship [95 pts]: Oculus Beams, Bulk Landers, Plasma Gale
+Chimera Troopship [95 pts]: Oculus Beams, Bulk Landers, Plasma Gale
+Kulshedra Heavy Carrier [164 pts]: Oculus Beams, Plasma Tempest, Plasma Gale, Fighters & Bombers
+Kulshedra Heavy Carrier [164 pts]: Oculus Beams, Plasma Tempest, Plasma Gale, Fighters & Bombers
+
+## Light Groups [697 pts]
+Djinn Frigates [264 pts]:
+• 6x Djinn Frigate [44 pts]: Oculus Rays, Plasma Storm
+Djinn Frigates [264 pts]:
+• 6x Djinn Frigate [44 pts]: Oculus Rays, Plasma Storm
+Ebisu Tackling Cutters [69 pts]:
+• 3x Ebisu Tackling Cutter [23 pts]: Engine Needle, Boarding Pods
+Lamassu Barges [100 pts]:
+• 2x Lamassu Barge [50 pts]: Oculus Rays, Plasma Bombs, Bulk Landers

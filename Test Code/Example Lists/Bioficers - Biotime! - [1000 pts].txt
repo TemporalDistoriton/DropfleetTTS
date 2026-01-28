@@ -1,0 +1,38 @@
+Bioficers - Biotime! - [1000 pts]
+
+# ++ Fleet ++ [1000 pts]
+## Configuration
+Game Size: Skirmish
+
+## Admirals [20 pts]
+Lvl 2: Admiral [20 pts]
+
+## Heavy Groups [185 pts]
+Sanctum Battlecruiser [185 pts]: Decon Blast, Fighters & Bombers
+
+## Medium Groups [543 pts]
+Cache Light Cruisers [65 pts]:
+• 1x Cache Light Cruiser [65 pts]: Heavy Lightvice
+Cacophony Heavy Cruiser [132 pts]: 2x Scythes
+Cavern Fleet Carriers [125 pts]:
+• 1x Cavern Fleet Carrier [125 pts]: Scythes, Fighters & Bombers
+Cavern Fleet Carriers [125 pts]:
+• 1x Cavern Fleet Carrier [125 pts]: Scythes, Fighters & Bombers
+Construct Cruisers [96 pts]:
+• 1x Construct Cruiser [96 pts]: Scythes, Barb Stinger
+
+## Light Groups [187 pts]
+Forestall Frigates [76 pts]:
+• 2x Forestall Frigate [38 pts]: Scythe Nodule
+Fulcrum Frigates [111 pts]:
+• 3x Fulcrum Frigate [37 pts]: Barb Spiker
+
+## Payload Groups [65 pts]
+Lander Cells [15 pts]:
+• 1x Lander Cell [15 pts]: Bulk Landers
+Lander Cells [15 pts]:
+• 1x Lander Cell [15 pts]: Bulk Landers
+Lander Cells [15 pts]:
+• 1x Lander Cell [15 pts]: Bulk Landers
+Torpedo Cells [20 pts]:
+• 1x Torpedo Cell [20 pts]: Torpedo
