@@ -6,12 +6,14 @@ All faction tiles in this save file now support spawning ship cards directly fro
 ## How to Use
 
 1. **Click the "Spawn from List" button** on any faction tile
-   - This will show a text input box below the tile
-2. **Paste your fleet list** into the text box
-3. **Press Enter/Return** to process the list and spawn ships
-4. The input box will automatically hide after spawning
+   - A Global UI panel will appear in your view
+2. **Paste your fleet list** into the text input field in the panel
+   - The panel preserves all formatting (spaces, newlines, bullets)
+3. **Click "Spawn Ships"** button in the panel
+4. Ships will spawn automatically in your player area
+5. The panel will auto-close after spawning
 
-**Note:** Click "Spawn from List" again to toggle the input box on/off.
+**Note:** Click "Spawn from List" again to toggle the panel on/off, or click "Close" in the panel.
 
 The ships will spawn in a line in your player area, with proper spacing between them.
 
@@ -28,13 +30,14 @@ New Cairo Light Cruisers [140 pts]:
 ```
 
 ### Key Features:
-- **Toggle input box**: Click "Spawn from List" to show/hide the text input field
-- **Text input validation**: Properly configured to accept any text (validation = 5)
+- **Global UI panel**: Floating window that appears when you click "Spawn from List"
+- **Full text preservation**: XML InputField preserves spaces, newlines, and all special characters
+- **Multi-line support**: Properly handles fleet lists with multiple lines
 - **Automatic quantity detection**: Lines with "2x" or "3x" will spawn multiple copies
 - **Default quantity**: If no number is specified, 1 ship is spawned
 - **Smart filtering**: Headers, admirals, and configuration lines are automatically skipped
 - **Fuzzy matching**: Ship names are matched flexibly (e.g., "Johannesburg Battlecruiser" matches "Johannesburg")
-- **Auto-hide**: Input box automatically hides after successful spawning
+- **Auto-hide**: Panel automatically closes after successful spawning
 
 ## Technical Details
 
@@ -65,14 +68,14 @@ All of these lists have been tested and parse correctly.
 
 ## Troubleshooting
 
-### Input box not accepting text
-- The input field is now properly configured with `validation = 5` (unrestricted text)
-- You can paste any fleet list text without restrictions
-- If you still have issues, click "Spawn from List" to toggle the box off and on again
+### Text appears without spaces or newlines
+- This issue has been fixed! The new Global XML UI properly preserves all formatting.
+- Make sure you're using the latest version (commit 2c99fd3 or later)
 
-### Input box is too large or overlapping
-- Click "Spawn from List" to hide the input box when not in use
-- The box only appears when you need it
+### Panel not appearing
+- Make sure you clicked "Spawn from List" button on the faction tile
+- Check that you're looking at your screen (panel appears in Global UI space)
+- Try clicking the button again to toggle
 
 ### "No ships found in the list"
 - Make sure you're pasting a properly formatted fleet list
