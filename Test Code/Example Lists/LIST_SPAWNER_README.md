@@ -6,8 +6,12 @@ All faction tiles in this save file now support spawning ship cards directly fro
 ## How to Use
 
 1. **Click the "Spawn from List" button** on any faction tile
-2. **Paste your fleet list** into the text box that appears below the buttons
+   - This will show a text input box below the tile
+2. **Paste your fleet list** into the text box
 3. **Press Enter/Return** to process the list and spawn ships
+4. The input box will automatically hide after spawning
+
+**Note:** Click "Spawn from List" again to toggle the input box on/off.
 
 The ships will spawn in a line in your player area, with proper spacing between them.
 
@@ -24,10 +28,13 @@ New Cairo Light Cruisers [140 pts]:
 ```
 
 ### Key Features:
+- **Toggle input box**: Click "Spawn from List" to show/hide the text input field
+- **Text input validation**: Properly configured to accept any text (validation = 5)
 - **Automatic quantity detection**: Lines with "2x" or "3x" will spawn multiple copies
 - **Default quantity**: If no number is specified, 1 ship is spawned
 - **Smart filtering**: Headers, admirals, and configuration lines are automatically skipped
 - **Fuzzy matching**: Ship names are matched flexibly (e.g., "Johannesburg Battlecruiser" matches "Johannesburg")
+- **Auto-hide**: Input box automatically hides after successful spawning
 
 ## Technical Details
 
@@ -57,6 +64,15 @@ The following example lists are provided for testing:
 All of these lists have been tested and parse correctly.
 
 ## Troubleshooting
+
+### Input box not accepting text
+- The input field is now properly configured with `validation = 5` (unrestricted text)
+- You can paste any fleet list text without restrictions
+- If you still have issues, click "Spawn from List" to toggle the box off and on again
+
+### Input box is too large or overlapping
+- Click "Spawn from List" to hide the input box when not in use
+- The box only appears when you need it
 
 ### "No ships found in the list"
 - Make sure you're pasting a properly formatted fleet list

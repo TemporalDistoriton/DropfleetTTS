@@ -12,7 +12,9 @@ Implemented a **character-by-character text processing system** that completely 
 
 1. **User Interface**
    - Added "Spawn from List" button to all faction tiles
-   - Added text input field below buttons for pasting fleet lists
+   - Added toggle functionality to show/hide text input field
+   - Text input properly configured with `validation = 5` for unrestricted text
+   - Input box automatically hides after successful spawning
    - Uses TTS's built-in `createInput` API
 
 2. **Text Processing Pipeline**
@@ -168,10 +170,13 @@ end
 
 1. Open TS_Save_13540.json in Tabletop Simulator
 2. Click any faction tile (e.g., "Faction UCM")
-3. Click "Spawn from List" button
-4. Paste your fleet list into the text box below
+3. Click "Spawn from List" button to show the input box
+4. Paste your fleet list into the text box
 5. Press Enter/Return
 6. Ships spawn automatically in your player area
+7. Input box automatically hides after spawning
+
+**Tip:** Click "Spawn from List" again to toggle the input box on/off as needed.
 
 ## Future Enhancements (Optional)
 
