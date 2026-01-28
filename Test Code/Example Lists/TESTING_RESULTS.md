@@ -9,11 +9,11 @@ All example lists have been tested with the parser and successfully extract ship
 | List File | Ships Found | Total to Spawn | Status |
 |-----------|-------------|----------------|--------|
 | UCM Test.txt | 8 | 9 | ✓ PASS |
-| Bioficers - Biotime! [1000 pts].txt | 23 | 26 | ✓ PASS |
+| Bioficers - Biotime! - [1000 pts].txt | 23 | 26 | ✓ PASS |
 | PHR - A wizard did.txt | 15 | 19 | ✓ PASS |
-| Scourge - Scourge Rush [1500 pts].txt | 15 | 28 | ✓ PASS |
-| Shaltari - Pluto [1515 pts].txt | 24 | 35 | ✓ PASS |
-| Resistance - Resist Test [751 pts].txt | 8 | 11 | ✓ PASS |
+| Scourge - Scourge Rush - [1500 pts].txt | 15 | 28 | ✓ PASS |
+| Shaltari - Pluto - [1515 pts].txt | 24 | 35 | ✓ PASS |
+| Resistance - Resist Test - [751 pts.txt | 8 | 11 | ✓ PASS |
 | UCM - Victor.txt | 21 | 23 | ✓ PASS |
 
 **Overall: 7/7 lists parsed successfully (100%)**
@@ -79,13 +79,15 @@ The character-by-character processing approach successfully avoids Lua pattern m
 ### Conclusion
 
 The list spawner functionality is fully operational and has been successfully integrated into all 8 faction tiles:
-- Faction UCM
-- Faction PHR
-- Faction BIO
-- Faction SCO
-- Faction RES
-- Faction SHA
-- Faction CIV
-- Faction IND
+- Faction UCM (United Colonies of Mankind)
+- Faction PHR (Post-Human Republic)
+- Faction BIO (Bioficers)
+- Faction SCO (Scourge)
+- Faction RES (Resistance)
+- Faction SHA (Shaltari)
+- Faction CIV (Civilians)
+- Faction IND (Independent)
+
+Note: "Bioficers" (faction BIO) is the correct name used in this mod
 
 All test lists parse correctly without errors, and the spawning logic is ready for use in Tabletop Simulator.
