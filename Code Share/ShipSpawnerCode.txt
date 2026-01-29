@@ -1,0 +1,1593 @@
+--[[
+    Ship Picker Script - Industrial Faction
+    ---------------------------------
+    A ship card selection tool that saves card data and displays them in a searchable
+    XML UI interface. Players can browse ships by tonnage category, search by name,
+    select multiple cards, and spawn them to their play area.
+
+    Features:
+    - Setup Mode: Select cards to save using box-selection
+    - Card JSON saving: Captures card data including nested scripts
+    - View Ships: Opens XML UI in player's Global UI showing all saved cards
+    - Tonnage Tabs: Light, Medium, Heavy, Colossal (based on baseScale in card script)
+    - Search Function: Filter cards by name
+    - Multi-select: Click cards to highlight green for selection
+    - Spawn to Player Area: Spawns selected cards in a line at player's position
+--]]
+
+--==============================================================================
+-- CONFIGURATION
+--==============================================================================
+
+CONFIG = {
+    -- Faction name (used in broadcasts and UI title)
+    FACTION_NAME = "INDUSTRIAL",
+
+    -- UI appearance settings
+    UI = {
+        -- Main panel dimensions
+        PANEL_WIDTH = 720,
+        PANEL_HEIGHT = 820,
+
+        -- Card grid settings (legacy, kept for compatibility)
+        CARDS_PER_ROW = 3,
+        CARD_WIDTH = 350,
+        CARD_HEIGHT = 490,
+        CARD_SPACING = 10,
+
+        -- Colors
+        PANEL_COLOR = "rgba(0.1, 0.1, 0.15, 1)",
+        TAB_COLOR = "rgba(0.2, 0.2, 0.3, 1)",
+        TAB_SELECTED_COLOR = "rgba(0.4, 0.4, 0.6, 1)",
+        CARD_COLOR = "rgba(0.25, 0.25, 0.35, 1)",
+        CARD_SELECTED_COLOR = "rgba(0.2, 0.8, 0.3, 1)",
+        BUTTON_COLOR = "rgba(0.3, 0.5, 0.8, 1)",
+        CLOSE_BUTTON_COLOR = "rgba(0.8, 0.2, 0.2, 1)",
+        TEXT_COLOR = "#FFFFFF",
+        SEARCH_BG_COLOR = "rgba(0.15, 0.15, 0.2, 1)",
+
+        --======================================================================
+        -- ELEMENT SIZE CONTROLS
+        --======================================================================
+
+        -- Search Row: Input field and Clear button
+        SEARCH_ROW_HEIGHT = 28,          -- Height for the entire search row
+        SEARCH_INPUT_WIDTH = 200,        -- Width of the search text input
+        CLEAR_BUTTON_WIDTH = 100,         -- Width of the Clear button
+        CLEAR_BUTTON_HEIGHT = 28,        -- Height of the Clear button
+
+        -- Close (X) Button
+        CLOSE_BUTTON_WIDTH = 28,         -- Width of the X button
+        CLOSE_BUTTON_HEIGHT = 28,        -- Height of the X button
+
+        -- Tonnage Tabs Row
+        TABS_ROW_HEIGHT = 35,            -- Height for the tonnage tabs row
+
+        -- Arrow Buttons (Left/Right navigation)
+        ARROW_BUTTON_WIDTH = 75,         -- Width of arrow buttons
+        -- Arrow height is flexible (fills available vertical space)
+
+        -- Spawn Button
+        SPAWN_BUTTON_HEIGHT = 45,        -- Height of the Spawn Ship Card button
+
+        -- Font sizes
+        FONT_SIZE_SEARCH = 13,
+        FONT_SIZE_TABS = 25,
+        FONT_SIZE_ARROWS = 60,
+        FONT_SIZE_SPAWN = 32,
+        FONT_SIZE_CLOSE = 14,
+    },
+
+    -- Player spawn positions (where first card spawns for each player color)
+    -- Cards spawn left-to-right from this position
+    PLAYER_SPAWN_POSITIONS = {
+        ["Red"] = {
+            position = {x = -27.08, y = 1.36, z = 9.78},
+            rotation = {x = 0, y = 270, z = 0},
+            direction = {x = 0, y = 0, z = -1}, -- Cards spawn along -Z axis ("Right" for Red)
+        },
+        ["Blue"] = {
+            position = {x = 27.08, y = 1.36, z = -9.78},
+            rotation = {x = 0, y = 90, z = 0},
+            direction = {x = 0, y = 0, z = 1}, -- Cards spawn along +Z axis ("Left" for Blue)
+        },
+        -- Add more player colors as needed
+    },
+
+    -- Spacing between spawned cards
+    CARD_SPAWN_SPACING = 2.92,
+
+    -- Tonnage categories based on baseScale values in card scripts
+    -- Format: { {name="CategoryName", minScale=X, maxScale=Y}, ... }
+    -- Adjust these ranges based on your actual baseScale values
+    TONNAGE_CATEGORIES = {
+        "Other", "Cell", "Corvette", "Lighter", "Frigate", "Carrier", "Monitor",
+        "Cutter", "Destroyer", "Runner", "Light Cruiser", "Cruiser", "Heavy Cruiser",
+        "Troopship", "Battlecruiser", "Battleship", "Supercarrier", "Super Battleship",
+        "Dreadnaught"
+    }
+}
+
+--==============================================================================
+-- STATE VARIABLES
+--==============================================================================
+
+-- Array of saved ship card data
+-- Format: { {json=string, name=string, imageURL=string, tonnage=string, baseScale=number} }
+savedShipCards = {}
+
+-- Backup used during setup mode
+savedShipCardsBackup = {}
+
+-- Tracks which cards are currently selected in the UI (per player)
+-- Format: { [playerColor] = { [cardIndex] = true/false } }
+playerSelections = {}
+
+-- Tracks the current card index being viewed (per player)
+playerCardIndices = {}
+
+-- Tracks the current search filter (per player)
+-- Format: { [playerColor] = "searchString" }
+playerSearchFilters = {}
+
+-- Tracks the current active tab (per player)
+-- Format: { [playerColor] = "tabName" }
+playerActiveTabs = {}
+
+-- Tracks the number of spawned cards for each player to determine position
+-- Format: { [playerColor] = number }
+playerSpawnCounts = {}
+    playerListInputs = {}
+    playerListUIVisible = {}
+playerListInputText = {}  -- Store the input text separately
+
+-- Whether this picker has been configured (has cards saved)
+fresh = true
+
+-- The GUID of this object (for UI callback targeting)
+selfGUID = ""
+
+--==============================================================================
+-- SAVE/LOAD FUNCTIONS
+--==============================================================================
+
+-- Saves data by embedding it directly into the Lua script
+function updateSave()
+    local script = self.getLuaScript()
+
+    -- Find where the embedded data section starts
+    local dataStartPattern = "\n%-%-EMBEDDED_DATA_START"
+    local dataStart = script:find(dataStartPattern)
+
+    if dataStart then
+        script = script:sub(1, dataStart - 1)
+    end
+
+    -- Build the embedded data section
+    local embeddedData = "\n--EMBEDDED_DATA_START\n"
+    embeddedData = embeddedData .. "savedShipCards = {\n"
+
+    for i, card in ipairs(savedShipCards) do
+        embeddedData = embeddedData .. "  {\n"
+        embeddedData = embeddedData .. "    name = [====[" .. (card.name or "Unknown") .. "]====],\n"
+        embeddedData = embeddedData .. "    imageURL = [====[" .. (card.imageURL or "") .. "]====],\n"
+        embeddedData = embeddedData .. "    tonnage = [====[" .. (card.tonnage or "Light") .. "]====],\n"
+        embeddedData = embeddedData .. "    baseScale = " .. (card.baseScale or 1) .. ",\n"
+        if card.json then
+            embeddedData = embeddedData .. "    json = [====[" .. card.json .. "]====],\n"
+        end
+        embeddedData = embeddedData .. "  },\n"
+    end
+
+    embeddedData = embeddedData .. "}\n\n"
+    embeddedData = embeddedData .. "fresh = " .. tostring(fresh) .. "\n"
+
+    script = script .. embeddedData
+    self.setLuaScript(script)
+end
+
+-- Called when the object is loaded
+function onLoad(saved_data)
+    selfGUID = self.getGUID()
+
+    -- Initialize variables if they don't exist
+    if savedShipCards == nil then
+        savedShipCards = {}
+    end
+    if fresh == nil then
+        fresh = true
+    end
+
+    -- Update fresh status based on data
+    if #savedShipCards > 0 then
+        fresh = false
+    end
+
+    -- Initialize player state tables
+    playerSelections = {}
+    playerCardIndices = {}
+    playerSearchFilters = {}
+    playerActiveTabs = {}
+    playerSpawnCounts = {}
+
+    -- Clean loaded data
+    for _, card in ipairs(savedShipCards) do
+        if card.json then card.json = stripBrackets(card.json) end
+        if card.imageURL then card.imageURL = stripBrackets(card.imageURL) end
+    end
+
+    -- Show appropriate buttons
+    if fresh then
+        createSetupButton()
+    else
+        createMainButtonsWithList()
+    end
+end
+
+--==============================================================================
+-- BUTTON CREATION FUNCTIONS
+--==============================================================================
+
+-- Creates the initial Setup button when no cards are saved
+function createSetupButton()
+    self.clearButtons()
+    self.clearInputs()
+
+    self.createButton({
+        label = "Setup",
+        click_function = "buttonClick_setup",
+        function_owner = self,
+        position = {0, 1, 0},
+        rotation = {0, 0, 0},
+        height = 350,
+        width = 800,
+        font_size = 250,
+        color = {0.2, 0.2, 0.3},
+        font_color = {1, 1, 1}
+    })
+end
+
+-- Creates the main action buttons (View Ships, Setup)
+function createMainButtonsWithList()
+    self.clearButtons()
+    self.clearInputs()
+
+    -- View Ships button (main action)
+    self.createButton({
+        label = "View Ships",
+        click_function = "buttonClick_viewShips",
+        function_owner = self,
+        position = {0, 1, 1},
+        rotation = {0, 0, 0},
+        height = 260,
+        width = 800,
+        font_size = 160,
+        color = {0.31, 0.31, 0.31},
+        font_color = {1, 1, 1}
+    })
+
+    -- Setup button (to modify saved cards)
+    self.createButton({
+        label = "Setup",
+        click_function = "buttonClick_setup",
+        function_owner = self,
+        position = {0, 1, 1.36},
+        rotation = {0, 0, 0},
+        height = 230,
+        width = 550,
+        scale = {0.4, 0.4, 0.4},
+        font_size = 200,
+        color = {0.2, 0.2, 0.3},
+        font_color = {1, 1, 1}
+    })
+end
+
+-- Creates buttons during Setup mode
+function createSetupActionButtons()
+    self.clearButtons()
+    self.clearInputs()
+
+    -- Cancel button
+    self.createButton({
+        label = "Cancel",
+        click_function = "buttonClick_cancel",
+        function_owner = self,
+        position = {0, 1, 1.5},
+        rotation = {0, 0, 0},
+        height = 300,
+        width = 900,
+        font_size = 200,
+        color = {0.4, 0.2, 0.2},
+        font_color = {1, 1, 1}
+    })
+
+    -- Add button
+    self.createButton({
+        label = "Add Ships",
+        click_function = "buttonClick_add",
+        function_owner = self,
+        position = {0, 1, 0},
+        rotation = {0, 0, 0},
+        height = 300,
+        width = 1000,
+        font_size = 200,
+        color = {0.2, 0.5, 0.2},
+        font_color = {1, 1, 1}
+    })
+
+    -- Remove button (only if cards exist)
+    if not fresh then
+        self.createButton({
+            label = "Remove Ships",
+            click_function = "buttonClick_remove",
+            function_owner = self,
+            position = {0, 1, 0.6},
+            rotation = {0, 0, 0},
+            height = 300,
+            width = 1100,
+            font_size = 200,
+            color = {0.5, 0.2, 0.2},
+            font_color = {1, 1, 1}
+        })
+    end
+
+    -- Reset button
+    self.createButton({
+        label = "Reset",
+        click_function = "buttonClick_reset",
+        function_owner = self,
+        position = {0, 1, -3},
+        rotation = {0, 0, 0},
+        height = 300,
+        width = 900,
+        font_size = 200,
+        color = {0.3, 0.3, 0.3},
+        font_color = {1, 1, 1}
+    })
+end
+
+--==============================================================================
+-- SETUP MODE FUNCTIONS
+--==============================================================================
+
+-- Enters setup mode
+function buttonClick_setup()
+    savedShipCardsBackup = duplicateTable(savedShipCards)
+    createSetupActionButtons()
+    broadcastToAll("Setup Mode: Box-select ship cards, then click Add/Remove", {1, 1, 1})
+end
+
+-- Cancel setup
+function buttonClick_cancel()
+    savedShipCards = savedShipCardsBackup
+
+    if #savedShipCards == 0 then
+        createSetupButton()
+    else
+        createMainButtonsWithList()
+    end
+
+    broadcastToAll("Setup Canceled", {1, 1, 1})
+end
+
+-- Add selected cards to memory
+function buttonClick_add(obj, player_color)
+    local selectedObjs = Player[player_color].getSelectedObjects()
+    local count = 0
+
+    for _, selectedObj in ipairs(selectedObjs) do
+        if selectedObj and not selectedObj.isDestroyed() and selectedObj ~= self then
+            -- Check if it's a card or tile
+            if selectedObj.tag == "Card" or selectedObj.tag == "Tile" then
+                -- Check if already saved (by name comparison)
+                local cardName = selectedObj.getName()
+                local alreadyExists = false
+
+                for _, saved in ipairs(savedShipCards) do
+                    if saved.name == cardName then
+                        alreadyExists = true
+                        break
+                    end
+                end
+
+                if not alreadyExists then
+                    -- Extract card data
+                    local cardData = extractCardData(selectedObj)
+                    if cardData then
+                        table.insert(savedShipCards, cardData)
+                        count = count + 1
+                    end
+                end
+            end
+        end
+    end
+
+    if count > 0 then
+        fresh = false
+        -- Sort cards alphabetically
+        sortShipCards()
+        updateSave()
+        broadcastToAll(count .. " ship card(s) added to " .. CONFIG.FACTION_NAME .. " Ship Picker", {0.2, 1, 0.2})
+    else
+        broadcastToAll("No new cards to add (select Card objects)", {1, 0.5, 0.5})
+    end
+
+    createMainButtonsWithList()
+end
+
+-- Remove selected cards from memory
+function buttonClick_remove(obj, player_color)
+    local selectedObjs = Player[player_color].getSelectedObjects()
+    local count = 0
+
+    local newSavedCards = {}
+
+    for _, saved in ipairs(savedShipCards) do
+        local shouldRemove = false
+
+        for _, selectedObj in ipairs(selectedObjs) do
+            if selectedObj and not selectedObj.isDestroyed() then
+                if selectedObj.getName() == saved.name then
+                    shouldRemove = true
+                    count = count + 1
+                    break
+                end
+            end
+        end
+
+        if not shouldRemove then
+            table.insert(newSavedCards, saved)
+        end
+    end
+
+    savedShipCards = newSavedCards
+
+    if #savedShipCards == 0 then
+        fresh = true
+        createSetupButton()
+    else
+        createMainButtonsWithList()
+    end
+
+    updateSave()
+    broadcastToAll(count .. " ship card(s) removed from " .. CONFIG.FACTION_NAME .. " Ship Picker", {1, 0.5, 0.5})
+end
+
+-- Reset all saved data
+function buttonClick_reset()
+    fresh = true
+    savedShipCards = {}
+    savedShipCardsBackup = {}
+    playerSelections = {}
+    playerSearchFilters = {}
+    playerActiveTabs = {}
+    playerSpawnCounts = {}
+
+    createSetupButton()
+    updateSave()
+    broadcastToAll(CONFIG.FACTION_NAME .. " Ship Picker Reset", {1, 1, 1})
+end
+
+--==============================================================================
+-- CARD DATA EXTRACTION
+--==============================================================================
+
+-- Extracts card data from a card object
+function extractCardData(cardObj)
+    if not cardObj then return nil end
+
+    -- Only allow Tile objects
+    if cardObj.tag ~= "Tile" then
+        broadcastToAll("Ignored object: Only Tile objects can be saved.", {1, 0.5, 0})
+        return nil
+    end
+
+    local cardData = {
+        name = cardObj.getName() or "Unknown Ship",
+        json = nil,
+        imageURL = "",
+        tonnage = "Light",
+        baseScale = 1,
+    }
+
+    -- Capture the exact JSON of the object (Tile)
+    -- We use this exactly as saved for spawning
+    cardData.json = cardObj.getJSON()
+
+    -- Extract Image URL for the UI listing (from CustomObject)
+    local customObj = cardObj.getCustomObject()
+    if customObj and customObj.image then
+        cardData.imageURL = customObj.image
+    end
+
+    -- Tonnage detection from Description (check for specific ship types)
+    local desc = cardObj.getDescription() or ""
+    local descLower = string.lower(desc)
+    local name = cardObj.getName() or ""
+    nameLower = string.lower(name)
+
+    -- Check both description and name for ship type
+    local text = descLower .. " " .. nameLower
+
+    -- Ordered from largest to smallest for proper detection
+    if string.find(text, "dreadnought") or string.find(text, "dreadnaught") then
+        cardData.tonnage = "Dreadnaught"
+    elseif string.find(text, "super battleship") or string.find(text, "superbattleship") then
+        cardData.tonnage = "Super Battleship"
+    elseif string.find(text, "supercarrier") then
+        cardData.tonnage = "Supercarrier"
+    elseif string.find(text, "battleship") then
+        cardData.tonnage = "Battleship"
+    elseif string.find(text, "battlecruiser") then
+        cardData.tonnage = "Battlecruiser"
+    elseif string.find(text, "troopship") then
+        cardData.tonnage = "Troopship"
+    elseif string.find(text, "heavy cruiser") then
+        cardData.tonnage = "Heavy Cruiser"
+    elseif string.find(text, "cruiser") then
+        cardData.tonnage = "Cruiser"
+    elseif string.find(text, "light cruiser") then
+        cardData.tonnage = "Light Cruiser"
+    elseif string.find(text, "runner") then
+        cardData.tonnage = "Runner"
+    elseif string.find(text, "destroyer") then
+        cardData.tonnage = "Destroyer"
+    elseif string.find(text, "cutter") then
+        cardData.tonnage = "Cutter"
+    elseif string.find(text, "monitor") then
+        cardData.tonnage = "Monitor"
+    elseif string.find(text, "carrier") then
+        cardData.tonnage = "Carrier"
+    elseif string.find(text, "frigate") then
+        cardData.tonnage = "Frigate"
+    elseif string.find(text, "lighter") then
+        cardData.tonnage = "Lighter"
+    elseif string.find(text, "corvette") then
+        cardData.tonnage = "Corvette"
+    elseif string.find(text, "cell") then
+        cardData.tonnage = "Cell"
+    else
+        cardData.tonnage = "Other" -- Default for unrecognized types
+    end
+
+    -- Attempt to find baseScale in the Lua script for Tonnage Category sorting
+    -- (This preserves the existing logic for categorizing ships in the UI)
+    local script = cardObj.getLuaScript()
+    if script then
+        local scale = script:match("baseScale%s*=%s*([%d%.]+)")
+        if scale then
+            cardData.baseScale = tonumber(scale)
+        end
+    end
+
+    return cardData
+end
+
+
+-- Sorts ship cards alphabetically by name
+function sortShipCards()
+    table.sort(savedShipCards, function(a, b)
+        return (a.name or "") < (b.name or "")
+    end)
+end
+
+--==============================================================================
+-- VIEW SHIPS UI FUNCTIONS
+--==============================================================================
+
+-- Opens the ship viewer UI for a player
+function buttonClick_viewShips(obj, player_color)
+    if #savedShipCards == 0 then
+        broadcastToColor("No ships saved! Use Setup to add ship cards.", player_color, {1, 0.5, 0.5})
+        return
+    end
+
+    if not playerSearchFilters[player_color] then playerSearchFilters[player_color] = "" end
+    if not playerActiveTabs[player_color] then playerActiveTabs[player_color] = "All" end
+    if not playerCardIndices[player_color] then playerCardIndices[player_color] = 1 end
+
+    -- Clear object buttons before showing UI
+    self.clearButtons()
+
+    -- Generate and display the UI
+    showShipPickerUI(player_color)
+end
+
+-- Generates and shows the ship picker XML UI for a player
+function showShipPickerUI(playerColor)
+    local shipPickerXML = generateShipPickerXML(playerColor)
+    self.UI.setXml(shipPickerXML)
+end
+
+
+-- Generates the XML for the ship picker UI
+function generateShipPickerXML(playerColor)
+    local cfg = CONFIG.UI
+    local activeTab = playerActiveTabs[playerColor] or "All"
+    local searchFilter = playerSearchFilters[playerColor] or ""
+    local currentIndex = playerCardIndices[playerColor] or 1
+
+    -- Get filtered and sorted cards
+    local filteredCards = getFilteredCards(activeTab, searchFilter)
+    local totalCards = #filteredCards
+
+    -- Handle edge case where filter results are empty or index is out of bounds
+    if totalCards == 0 then
+        currentIndex = 0
+    elseif currentIndex > totalCards then
+        currentIndex = 1
+        playerCardIndices[playerColor] = 1
+    elseif currentIndex < 1 then
+        currentIndex = 1
+        playerCardIndices[playerColor] = 1
+    end
+
+    local currentCard = nil
+    if currentIndex > 0 then
+        currentCard = filteredCards[currentIndex]
+    end
+
+    -- Get size values from config
+    local panelWidth = cfg.PANEL_WIDTH
+    local panelHeight = cfg.PANEL_HEIGHT
+    local searchRowHeight = cfg.SEARCH_ROW_HEIGHT
+    local tabsRowHeight = cfg.TABS_ROW_HEIGHT
+    local spawnButtonHeight = cfg.SPAWN_BUTTON_HEIGHT
+    local arrowWidth = cfg.ARROW_BUTTON_WIDTH
+    local closeWidth = cfg.CLOSE_BUTTON_WIDTH
+    local closeHeight = cfg.CLOSE_BUTTON_HEIGHT
+    local clearWidth = cfg.CLEAR_BUTTON_WIDTH
+    local clearHeight = cfg.CLEAR_BUTTON_HEIGHT
+    local searchInputWidth = cfg.SEARCH_INPUT_WIDTH
+
+    -- Build XML string
+    -- KEY INSIGHT: To control element size in layouts, you must set BOTH
+    -- minHeight/minWidth AND preferredHeight/preferredWidth.
+    -- Setting flexibleHeight="0" prevents expansion beyond preferred size.
+    local xml = [[
+<Panel id="shipPickerPanel"
+       visibility="]] .. playerColor .. [["
+       width="]] .. panelWidth .. [["
+       height="]] .. panelHeight .. [["
+       color="]] .. cfg.PANEL_COLOR .. [["
+       position="0 10 -110"
+       rotation="0 0 180"
+       scale=".28 .28 .28"
+       allowDragging="false"
+       returnToOriginalPositionWhenReleased="false">
+
+       <!-- CUSTOM TOOLTIP PANEL (not rotated) -->
+   <Panel id="customTooltip_]] .. playerColor .. [["
+          width="400"
+          height="60"
+          position="0 450 0"
+          rotation="0 0 0"
+          color="rgba(0,0,0,0.9)"
+          active="false"
+          rectAlignment="MiddleCenter">
+       <Text id="customTooltipText_]] .. playerColor .. [["
+             fontSize="18"
+             color="#FFFFFF"
+             alignment="MiddleCenter"
+             text=""/>
+   </Panel>
+
+    <!-- Main vertical layout with precise height control -->
+    <VerticalLayout padding="8 8 8 8" spacing="4"
+                    childForceExpandHeight="false"
+                    childForceExpandWidth="true">
+
+        <!-- ROW 1: SEARCH, CLEAR, CLOSE -->
+        <!-- Using minHeight + preferredHeight + flexibleHeight="0" for exact sizing -->
+        <HorizontalLayout minHeight="]] .. searchRowHeight .. [["
+                          preferredHeight="]] .. searchRowHeight .. [["
+                          flexibleHeight="0"
+                          spacing="4"
+                          childForceExpandHeight="true"
+                          childForceExpandWidth="false">
+
+            <Panel flexibleWidth="1" minWidth="0"/> <!-- Left Spacer -->
+
+            <InputField id="searchInput"
+                    onEndEdit="]] .. selfGUID .. [[/uiSearchChanged"
+                    placeholder="Search"
+                    minWidth="]] .. searchInputWidth .. [["
+                    preferredWidth="]] .. searchInputWidth .. [["
+                    flexibleWidth="0"
+                    minHeight="]] .. searchRowHeight .. [["
+                    preferredHeight="]] .. searchRowHeight .. [["
+                    alignment="MiddleCenter"
+                    color="]] .. cfg.SEARCH_BG_COLOR .. [["
+                    textColor="]] .. cfg.TEXT_COLOR .. [["
+                    fontSize="]] .. cfg.FONT_SIZE_SEARCH .. [[">]] .. searchFilter .. [[</InputField>
+
+            <Button id="clearSearchButton"
+                    onClick="]] .. selfGUID .. [[/uiClearSearch"
+                    minWidth="]] .. clearWidth .. [["
+                    preferredWidth="]] .. clearWidth .. [["
+                    flexibleWidth="0"
+                    minHeight="]] .. clearHeight .. [["
+                    preferredHeight="]] .. clearHeight .. [["
+                    color="rgba(0.4,0.4,0.4,1)"
+                    textColor="]] .. cfg.TEXT_COLOR .. [["
+                    fontSize="]] .. cfg.FONT_SIZE_TABS .. [[">Clear</Button>
+
+            <Panel flexibleWidth="1" minWidth="0"/> <!-- Right Spacer -->
+
+            <Button id="closeButton"
+                    onClick="]] .. selfGUID .. [[/uiCloseButton"
+                    minWidth="]] .. closeWidth .. [["
+                    preferredWidth="]] .. closeWidth .. [["
+                    flexibleWidth="0"
+                    minHeight="]] .. closeHeight .. [["
+                    preferredHeight="]] .. closeHeight .. [["
+                    color="]] .. cfg.CLOSE_BUTTON_COLOR .. [["
+                    textColor="]] .. cfg.TEXT_COLOR .. [["
+                    fontSize="]] .. cfg.FONT_SIZE_CLOSE .. [["
+                    fontStyle="Bold">X</Button>
+        </HorizontalLayout>
+
+        <!-- ROW 2: TONNAGE TABS -->
+        <HorizontalLayout minHeight="]] .. tabsRowHeight .. [["
+                          preferredHeight="]] .. tabsRowHeight .. [["
+                          flexibleHeight="0"
+                          spacing="2"
+                          childForceExpandHeight="true"
+                          childForceExpandWidth="true">
+]]
+
+    -- Add "All" tab with tooltip
+    local allTabColor = (activeTab == "All") and cfg.TAB_SELECTED_COLOR or cfg.TAB_COLOR
+    local allCount = #savedShipCards
+    xml = xml .. [[
+                <Button id="tabAll"
+                        onClick="]] .. selfGUID .. [[/uiTabClicked(All)"
+                        onMouseEnter="]] .. selfGUID .. [[/uiShowCustomTooltip(View all ]] .. allCount .. [[ ships in the fleet)"
+                        onMouseExit="]] .. selfGUID .. [[/uiHideCustomTooltip"
+                        flexibleWidth="1"
+                        minHeight="]] .. tabsRowHeight .. [["
+                        preferredHeight="]] .. tabsRowHeight .. [["
+                        color="]] .. allTabColor .. [["
+                        textColor="]] .. cfg.TEXT_COLOR .. [["
+                        fontSize="]] .. cfg.FONT_SIZE_TABS .. [[">All</Button>
+    ]]
+
+    -- Add tonnage category tabs with tooltips
+    for _, category in ipairs(CONFIG.TONNAGE_CATEGORIES) do
+        local tabColor = (activeTab == category) and cfg.TAB_SELECTED_COLOR or cfg.TAB_COLOR
+        local categoryCount = countCardsInCategory(category)
+        local tooltipText = "Filter by " .. category .. " class"
+        if categoryCount > 0 then
+            tooltipText = tooltipText .. " - " .. categoryCount .. " ship" .. (categoryCount == 1 and "" or "s") .. " available"
+        else
+            tooltipText = tooltipText .. " - No ships available"
+        end
+        xml = xml .. [[
+            <Button id="tab]] .. category .. [["
+                    onClick="]] .. selfGUID .. [[/uiTabClicked(]] .. category .. [[)"
+                    onMouseEnter="]] .. selfGUID .. [[/uiShowCustomTooltip(]] .. tooltipText .. [[)"
+                    onMouseExit="]] .. selfGUID .. [[/uiHideCustomTooltip"
+                    flexibleWidth="1"
+                    minHeight="]] .. tabsRowHeight .. [["
+                    preferredHeight="]] .. tabsRowHeight .. [["
+                    color="]] .. tabColor .. [["
+                    textColor="]] .. cfg.TEXT_COLOR .. [["
+                    fontSize="]] .. cfg.FONT_SIZE_TABS .. [[">]] .. category .. [[</Button>
+]]
+    end
+
+    xml = xml .. [[
+        </HorizontalLayout>
+
+        <!-- ROW 3: MAIN CONTENT (Arrows + Image) -->
+        <!-- This row takes all remaining space with flexibleHeight="1" -->
+        <HorizontalLayout spacing="4"
+                          flexibleHeight="1"
+                          minHeight="100"
+                          childForceExpandHeight="true"
+                          childForceExpandWidth="false">
+
+            <!-- Left Arrow - Fixed width, expands height to fill -->
+            <Button onClick="]] .. selfGUID .. [[/uiPrevCard"
+                    minWidth="]] .. arrowWidth .. [["
+                    preferredWidth="]] .. arrowWidth .. [["
+                    flexibleWidth="0"
+                    flexibleHeight="1"
+                    color="rgba(0.3,0.3,0.4,0.8)"
+                    textColor="]] .. cfg.TEXT_COLOR .. [["
+                    fontSize="]] .. cfg.FONT_SIZE_ARROWS .. [["
+                    fontStyle="Bold">&lt;</Button>
+
+            <!-- Card Display Area - fills remaining horizontal and vertical space -->
+            <Panel color="rgba(0,0,0,0.3)"
+                   flexibleWidth="1"
+                   flexibleHeight="1"
+                   minWidth="100">
+]]
+
+    if currentCard then
+        xml = xml .. [[
+                <Image image="]] .. currentCard.imageURL .. [["
+                       preserveAspect="true"
+                       rectAlignment="MiddleCenter"/>
+]]
+    else
+         xml = xml .. [[
+                <Text fontSize="16" color="]] .. cfg.TEXT_COLOR .. [[" alignment="MiddleCenter">No ships found</Text>
+]]
+    end
+
+    xml = xml .. [[
+            </Panel>
+
+            <!-- Right Arrow - Fixed width, expands height to fill -->
+            <Button onClick="]] .. selfGUID .. [[/uiNextCard"
+                    minWidth="]] .. arrowWidth .. [["
+                    preferredWidth="]] .. arrowWidth .. [["
+                    flexibleWidth="0"
+                    flexibleHeight="1"
+                    color="rgba(0.3,0.3,0.4,0.8)"
+                    textColor="]] .. cfg.TEXT_COLOR .. [["
+                    fontSize="]] .. cfg.FONT_SIZE_ARROWS .. [["
+                    fontStyle="Bold">&gt;</Button>
+        </HorizontalLayout>
+
+        <!-- ROW 4: SPAWN BUTTON -->
+        <HorizontalLayout minHeight="]] .. spawnButtonHeight .. [["
+                          preferredHeight="]] .. spawnButtonHeight .. [["
+                          flexibleHeight="0"
+                          childForceExpandWidth="true"
+                          childForceExpandHeight="true">
+            <Button id="spawnButton"
+                    onClick="]] .. selfGUID .. [[/uiSpawnCards"
+                    flexibleWidth="1"
+                    minHeight="]] .. spawnButtonHeight .. [["
+                    preferredHeight="]] .. spawnButtonHeight .. [["
+                    color="]] .. cfg.BUTTON_COLOR .. [["
+                    textColor="]] .. cfg.TEXT_COLOR .. [["
+                    fontSize="]] .. cfg.FONT_SIZE_SPAWN .. [["
+                    fontStyle="Bold">Spawn Ship Card</Button>
+        </HorizontalLayout>
+
+    </VerticalLayout>
+</Panel>
+]]
+
+    return xml
+end
+
+-- Show custom tooltip
+function uiShowCustomTooltip(player, value, id)
+    local playerColor = player.color
+    local tooltipText = value or ""
+
+    self.UI.setAttribute("customTooltip_" .. playerColor, "active", "true")
+    self.UI.setAttribute("customTooltipText_" .. playerColor, "text", tooltipText)
+end
+
+-- Hide custom tooltip
+function uiHideCustomTooltip(player, value, id)
+    local playerColor = player.color
+
+    self.UI.setAttribute("customTooltip_" .. playerColor, "active", "false")
+    self.UI.setAttribute("customTooltipText_" .. playerColor, "text", "")
+end
+
+-- Gets filtered cards based on active tab and search filter
+function getFilteredCards(activeTab, searchFilter)
+    local filtered = {}
+    local searchLower = string.lower(searchFilter or "")
+
+    for i, card in ipairs(savedShipCards) do
+        local matchesTab = (activeTab == "All") or (card.tonnage == activeTab)
+        local matchesSearch = (searchFilter == "") or string.find(string.lower(card.name or ""), searchLower, 1, true)
+
+        if matchesTab and matchesSearch then
+            local cardCopy = duplicateTable(card)
+            cardCopy.originalIndex = i
+            table.insert(filtered, cardCopy)
+        end
+    end
+
+    return filtered
+end
+
+-- Counts cards in a specific tonnage category
+function countCardsInCategory(categoryName)
+    local count = 0
+    for _, card in ipairs(savedShipCards) do
+        if card.tonnage == categoryName then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+-- Counts selected cards for a player (Unused in single-card view but kept for compatibility if needed)
+function countSelections(playerColor)
+    return 0
+end
+
+-- Escapes special XML characters
+function escapeXml(str)
+    if not str then return "" end
+    str = str:gsub("&", "&amp;")
+    str = str:gsub("<", "&lt;")
+    str = str:gsub(">", "&gt;")
+    str = str:gsub('"', "&quot;")
+    str = str:gsub("'", "&apos;")
+    return str
+end
+
+--==============================================================================
+-- UI CALLBACK FUNCTIONS
+--==============================================================================
+
+function uiCloseButton(player, value, id)
+    self.UI.setXml("")  -- Clear ALL UI
+
+    -- Restore buttons if they were cleared
+    if self.getButtons() == nil or #self.getButtons() == 0 then
+        createMainButtonsWithList()
+    end
+end
+
+-- Search input changed
+function uiSearchChanged(player, value, id)
+    local playerColor = player.color
+    playerSearchFilters[playerColor] = value or ""
+    Wait.time(function() showShipPickerUI(playerColor) end, 0.1)
+end
+
+-- Clear search button clicked
+function uiClearSearch(player, value, id)
+    local playerColor = player.color
+    playerSearchFilters[playerColor] = ""
+    playerCardIndices[playerColor] = 1 -- Reset index
+    Wait.time(function() showShipPickerUI(playerColor) end, 0.1)
+end
+
+-- Tab clicked
+function uiTabClicked(player, value, id)
+    local playerColor = player.color
+    -- Value contains the tab name passed as parameter
+    playerActiveTabs[playerColor] = value
+    playerCardIndices[playerColor] = 1
+    Wait.time(function() showShipPickerUI(playerColor) end, 0.1)
+end
+
+-- Next Card
+function uiNextCard(player, value, id)
+    local playerColor = player.color
+
+    local activeTab = playerActiveTabs[playerColor] or "All"
+    local searchFilter = playerSearchFilters[playerColor] or ""
+    local filteredCards = getFilteredCards(activeTab, searchFilter)
+    local total = #filteredCards
+
+    if total == 0 then return end
+
+    local index = playerCardIndices[playerColor] or 1
+    index = index + 1
+    if index > total then index = 1 end
+
+    playerCardIndices[playerColor] = index
+    Wait.time(function() showShipPickerUI(playerColor) end, 0.1)
+end
+
+-- Previous Card
+function uiPrevCard(player, value, id)
+    local playerColor = player.color
+
+    local activeTab = playerActiveTabs[playerColor] or "All"
+    local searchFilter = playerSearchFilters[playerColor] or ""
+    local filteredCards = getFilteredCards(activeTab, searchFilter)
+    local total = #filteredCards
+
+    if total == 0 then return end
+
+    local index = playerCardIndices[playerColor] or 1
+    index = index - 1
+    if index < 1 then index = total end
+
+    playerCardIndices[playerColor] = index
+    Wait.time(function() showShipPickerUI(playerColor) end, 0.1)
+end
+
+-- Spawn cards button clicked
+function uiSpawnCards(player, value, id)
+    local playerColor = player.color
+
+    local activeTab = playerActiveTabs[playerColor] or "All"
+    local searchFilter = playerSearchFilters[playerColor] or ""
+    local filteredCards = getFilteredCards(activeTab, searchFilter)
+    local index = playerCardIndices[playerColor] or 1
+
+    local card = filteredCards[index]
+
+    if not card then
+        broadcastToColor("No ship selected to spawn.", playerColor, {1, 0.5, 0.5})
+        return
+    end
+
+    -- Spawn values
+    spawnCardsForPlayer(playerColor, {card.originalIndex})
+    broadcastToColor("Spawned " .. card.name .. " in " .. playerColor .. " play area!", playerColor, {0.2, 1, 0.2})
+
+    -- UI stays open
+end
+
+-- Placeholder for unimplemented callbacks if any old XML still references them
+function uiCardClicked(player, value, id)
+   -- No-op in new UI
+end
+
+function uiClearSelection(player, value, id)
+    -- No-op
+    broadcastToColor(#selectedIndices .. " ship card(s) spawned to your play area!", playerColor, {0.2, 1, 0.2})
+end
+
+-- UI FOR SPAWN fleet
+function generateListInputPanel()
+    return string.format([[
+        <Panel id="ListInputPanel"
+               position="0 10 -110"
+               width="600"
+               height="550"
+               color="rgba(0.1, 0.1, 0.15, 0.95)"
+               active="false"
+               visibility=""
+               scale=".28 .28 .28"
+               rotation="0 0 180">
+            <Text fontSize="28" color="#FFFFFF" alignment="UpperCenter" offsetXY="0 -30">Spawn Ships from List</Text>
+            <Text fontSize="14" color="#CCCCCC" alignment="UpperCenter" offsetXY="0 -70" width="560">In New Recruit, Open your List, Click Export,</Text>
+            <Text fontSize="14" color="#CCCCCC" alignment="UpperCenter" offsetXY="0 -90" width="560">Click Text, Click Copy to clipboard, then paste below</Text>
+            <InputField id="ListInputField"
+                        onValueChanged="%s/onListInputChanged"
+                        fontSize="11"
+                        color="rgba(0.15, 0.15, 0.2, 1)"
+                        textColor="#FFFFFF"
+                        characterLimit="10000"
+                        lineType="MultiLineNewline"
+                        position="0 -50 0"
+                        width="560"
+                        height="350"
+                        placeholder="Paste fleet list here..."></InputField>
+            <Button onClick="%s/onSpawnShipsClick"
+                    fontSize="20"
+                    color="rgba(0.2, 0.6, 0.4, 1)"
+                    textColor="#FFFFFF"
+                    position="0 -360 0"
+                    width="200"
+                    height="45">Spawn Ships</Button>
+            <Button onClick="%s/onCloseListUIClick"
+                    fontSize="20"
+                    color="rgba(0.8, 0.2, 0.2, 1)"
+                    textColor="#FFFFFF"
+                    position="0 -410 0"
+                    width="200"
+                    height="45">Close</Button>
+        </Panel>
+    ]], selfGUID, selfGUID, selfGUID)
+end
+
+--==============================================================================
+-- CARD SPAWNING FUNCTIONS
+--==============================================================================
+
+-- Spawns selected cards for a player at their play area
+function spawnCardsForPlayer(playerColor, cardIndices)
+    if not playerSpawnCounts then playerSpawnCounts = {} end
+
+    local spawnConfig = CONFIG.PLAYER_SPAWN_POSITIONS[playerColor]
+
+    if not spawnConfig then
+        -- Default spawn position if player color not configured
+        spawnConfig = {
+            position = {x = 0, y = 1, z = 0},
+            rotation = {x = 0, y = 0, z = 0},
+            direction = {x = 1, y = 0, z = 0},
+        }
+        broadcastToColor("Warning: No spawn position configured for " .. playerColor .. ", using center.", playerColor, {1, 1, 0})
+    end
+
+    local startPos = spawnConfig.position
+    local rotation = spawnConfig.rotation
+    local direction = spawnConfig.direction
+    local spacing = CONFIG.CARD_SPAWN_SPACING
+
+    -- Get persistent spawn count for this player
+    local currentCount = playerSpawnCounts[playerColor] or 0
+
+    for i, cardIndex in ipairs(cardIndices) do
+        local card = savedShipCards[cardIndex]
+        if card and card.json then
+            -- Calculate spawn position based on cumulative count
+            local offset = currentCount * spacing
+            local spawnPos = {
+                x = startPos.x + (direction.x * offset),
+                y = startPos.y + (direction.y * offset),
+                z = startPos.z + (direction.z * offset),
+            }
+
+            -- Spawn the card
+            spawnObjectJSON({
+                json = card.json,
+                position = spawnPos,
+                rotation = rotation,
+                sound = true,
+            })
+
+            -- Increment count for next card
+            currentCount = currentCount + 1
+        end
+    end
+
+    -- Update persistent count
+    playerSpawnCounts[playerColor] = currentCount
+end
+
+--==============================================================================
+-- UTILITY FUNCTIONS
+--==============================================================================
+
+-- Duplicates a table (shallow copy for simple tables, recursive for nested)
+function duplicateTable(oldTable)
+    if type(oldTable) ~= "table" then return oldTable end
+
+    local newTable = {}
+    for k, v in pairs(oldTable) do
+        if type(v) == "table" then
+            newTable[k] = duplicateTable(v)
+        else
+            newTable[k] = v
+        end
+    end
+    return newTable
+end
+
+-- Rounds a number to the specified decimal places
+function round(num, dec)
+    local mult = 10 ^ (dec or 0)
+    return math.floor(num * mult + 0.5) / mult
+end
+
+-- Strips surrounding brackets [[...]] from a string if present
+function stripBrackets(str)
+    if not str then return "" end
+    -- Check for [=[ ... ]=] style first
+    local s, e = str:find("^%[=%[.*%]=%]$")
+    if s then return str:sub(4, -4) end
+
+    -- Check for [[ ... ]] style
+    s, e = str:find("^%[%[.*%]%]$")
+    if s then return str:sub(3, -3) end
+
+    return str
+end
+
+--==============================================================================
+-- EMBEDDED DATA (Auto-generated - Do not edit manually)
+--==============================================================================
+
+
+
+
+
+
+
+--==============================================================================
+-- LIST SPAWNER FUNCTIONS
+--==============================================================================
+
+-- Stores the list input per player
+playerListInputs = {}
+playerListUIVisible = {}
+playerListInputText = {}  -- Store the input text separately
+
+-- Adds a "Spawn from List" button to the main buttons
+function createMainButtonsWithList()
+    self.clearButtons()
+    self.clearInputs()
+
+    -- View Ships button (main action)
+    self.createButton({
+        label = "View Ships",
+        click_function = "buttonClick_viewShips",
+        function_owner = self,
+        position = {0, 1, 1},
+        rotation = {0, 0, 0},
+        height = 260,
+        width = 800,
+        font_size = 160,
+        color = {0.55, 0.5, 0.35},
+        font_color = {1, 1, 1}
+    })
+
+    -- Spawn from List button (new feature)
+    self.createButton({
+        label = "Spawn from List",
+        click_function = "buttonClick_spawnFromList",
+        function_owner = self,
+        position = {0, 1, -1.5},
+        rotation = {0, 0, 0},
+        height = 260,
+        width = 800,
+        font_size = 100,
+        color = {0.2, 0.6, 0.4},
+        font_color = {1, 1, 1}
+    })
+
+    -- Setup button (to modify saved cards)
+    self.createButton({
+        label = "Setup",
+        click_function = "buttonClick_setup",
+        function_owner = self,
+        position = {0, 1, 1.36},
+        rotation = {0, 0, 0},
+        height = 230,
+        width = 550,
+        scale = {0.4, 0.4, 0.4},
+        font_size = 200,
+        color = {0.2, 0.2, 0.3},
+        font_color = {1, 1, 1}
+    })
+end
+
+-- Button click handler for spawning from list
+function buttonClick_spawnFromList(obj, playerColor, altClick)
+    if altClick then return end
+
+    Player[playerColor].broadcast("Paste your fleet list in the window and click 'Spawn Ships'.", {0.2, 0.8, 1})
+
+    -- Generate ONLY the list panel with active="true"
+    local listPanelXML = generateListInputPanel()
+    -- Replace active="false" with active="true" in the XML
+    listPanelXML = listPanelXML:gsub('active="false"', 'active="true"')
+
+    self.UI.setXml(listPanelXML)
+
+    playerListUIVisible[playerColor] = true
+    self.clearButtons()
+end
+
+-- Called when text changes in the InputField
+function onListInputChanged(player, value, id)
+    -- Store the text as it's typed/pasted
+    playerListInputText[player.color] = value
+end
+--a
+-- Called when the Spawn Ships button is clicked in the UI
+function onSpawnShipsClick(player, value, id)
+    -- Get the stored input text
+    local input = playerListInputText[player.color]
+
+    -- Also try getValue as fallback
+    if not input or input == "" then
+        input = self.UI.getValue("ListInputField")
+    end
+
+    -- Debug output
+    player.broadcast("Debug: Stored text length = " .. tostring(#(playerListInputText[player.color] or "")), {1, 1, 0})
+    player.broadcast("Debug: getValue length = " .. tostring(#(self.UI.getValue("ListInputField") or "")), {1, 1, 0})
+
+    if not input or input == "" or #input == 0 then
+        player.broadcast("Please paste a fleet list first.", {1, 0.5, 0})
+        return
+    end
+
+    -- Store and parse
+    playerListInputs[player.color] = input
+    parseAndSpawnList(input, player.color)
+
+    -- Clear the input and hide UI
+    playerListInputText[player.color] = ""
+    self.UI.setValue("ListInputField", "")
+    self.UI.setAttribute("ListInputPanel", "active", "false")
+    self.UI.setAttribute("ListInputPanel", "rotation", "0 0 0")
+    playerListUIVisible[player.color] = false
+
+    -- Restore buttons
+    createMainButtonsWithList()
+end
+
+-- Called when the Close button is clicked in the UI
+function onCloseListUIClick(player, value, id)
+    self.UI.setXml("")  -- Clear ALL UI
+    playerListUIVisible[player.color] = false
+    playerListInputText[player.color] = ""
+
+    -- Restore buttons
+    createMainButtonsWithList()
+end
+
+-- Parses a fleet list and spawns the ships
+function parseAndSpawnList(listText, playerColor)
+    local lines = splitIntoLines(listText)
+    local shipEntries = extractShipEntries(lines)
+
+    if #shipEntries == 0 then
+        broadcastToColor("No ships found in the list. Make sure the format is correct.", playerColor, {1, 0.5, 0})
+        return
+    end
+
+    local spawnedCount = 0
+    local notFoundList = {}
+
+    for _, entry in ipairs(shipEntries) do
+        local quantity = entry.quantity
+        local shipName = entry.name
+        local matchedCards = findMatchingCards(shipName)
+
+        if #matchedCards > 0 then
+            local cardIndex = matchedCards[1]
+            for i = 1, quantity do
+                spawnCardsForPlayer(playerColor, {cardIndex})
+                spawnedCount = spawnedCount + 1
+            end
+        else
+            table.insert(notFoundList, shipName)
+        end
+    end
+
+    if spawnedCount > 0 then
+        broadcastToColor("Spawned " .. spawnedCount .. " ship cards from list.", playerColor, {0.2, 1, 0.3})
+    end
+
+    if #notFoundList > 0 then
+        local notFoundMsg = "Warning: Could not find cards for: "
+        for i, name in ipairs(notFoundList) do
+            if i > 1 then notFoundMsg = notFoundMsg .. ", " end
+            notFoundMsg = notFoundMsg .. name
+            if i >= 5 then
+                notFoundMsg = notFoundMsg .. " (and more...)"
+                break
+            end
+        end
+        broadcastToColor(notFoundMsg, playerColor, {1, 1, 0})
+    end
+end
+
+-- Splits text into lines using character-by-character processing
+function splitIntoLines(text)
+    local lines = {}
+    local currentLine = ""
+    for i = 1, #text do
+        local char = text:sub(i, i)
+        if char == "\n" or char == "\r" then
+            if #currentLine > 0 then
+                table.insert(lines, currentLine)
+                currentLine = ""
+            end
+        else
+            currentLine = currentLine .. char
+        end
+    end
+    if #currentLine > 0 then
+        table.insert(lines, currentLine)
+    end
+    return lines
+end
+
+-- Removes line number prefix from a line (e.g., "11. ")
+function removeLineNumber(line)
+    local dotPos = findChar(line, ".")
+    if dotPos and dotPos < 5 then
+        local beforeDot = trimString(line:sub(1, dotPos - 1))
+        if isNumeric(beforeDot) then
+            return trimString(line:sub(dotPos + 1))
+        end
+    end
+    return line
+end
+
+-- Extracts ship entries from lines
+function extractShipEntries(lines)
+    local entries = {}
+    for _, line in ipairs(lines) do
+        line = trimString(line)
+        if #line > 0 and not isHeaderLine(line) then
+            local entry = parseShipLine(line)
+            if entry then
+                table.insert(entries, entry)
+            end
+        end
+    end
+    return entries
+end
+
+-- Checks if a line is a header/section line
+function isHeaderLine(line)
+    if #line == 0 then return true end
+    if line:sub(1, 1) == "#" then return true end
+
+    local lowerLine = line:lower()
+
+    -- Check for configuration keywords
+    if contains(lowerLine, "configuration") or
+       contains(lowerLine, "game size") or
+       contains(lowerLine, "fleet ++") or
+       contains(lowerLine, "famous admirals") then
+        return true
+    end
+
+    -- Check for section headers like "Admirals [25 pts]" or "Heavy Groups [180 pts]"
+    if (contains(lowerLine, "admirals") or contains(lowerLine, "groups")) and
+       contains(lowerLine, "[") and contains(lowerLine, "pts]") then
+        -- But make sure it's not a ship line (ships have bullets or quantity)
+        if not contains(lowerLine, "•") and not contains(line, "x ") then
+            return true
+        end
+    end
+
+    return false
+end
+
+-- Parses a single ship line and extracts name and quantity
+function parseShipLine(line)
+    line = trimString(line)
+    if #line == 0 then return nil end
+
+    -- Remove line number if present
+    line = removeLineNumber(line)
+    line = trimString(line)
+
+    -- Check if this is a "group header" line (ends with colon, no bullet, no quantity)
+    local colonPos = findChar(line, ":")
+    local bulletPresent = (line:sub(1, 1) == "•" or line:sub(1, 1) == "-" or line:sub(1, 1) == "*")
+
+    -- If line ends with ":" and has no bullet and no "x " pattern, it's likely a group header
+    if colonPos == #line and not bulletPresent then
+        -- Check if there's a quantity pattern
+        local hasQuantity = false
+        for i = 1, 6 do
+            if i < #line and line:sub(i, i) == "x" and line:sub(i+1, i+1) == " " then
+                hasQuantity = true
+                break
+            end
+        end
+        if not hasQuantity then
+            return nil  -- Skip group headers
+        end
+    end
+
+    -- Remove bullet point if present
+    if bulletPresent then
+        line = trimString(line:sub(2))
+    end
+
+    -- Look for quantity prefix like "2x"
+    local quantity = 1
+    local xPos = findChar(line, "x")
+    if xPos and xPos < 6 then
+        local beforeX = trimString(line:sub(1, xPos - 1))
+        if isNumeric(beforeX) then
+            quantity = tonumber(beforeX) or 1
+            line = trimString(line:sub(xPos + 2))
+        end
+    end
+
+    -- Extract ship name (before bracket or colon)
+    local bracketPos = findChar(line, "[")
+    colonPos = findChar(line, ":")
+
+    local nameEnd = #line
+    if bracketPos and (not colonPos or bracketPos < colonPos) then
+        nameEnd = bracketPos - 1
+    elseif colonPos then
+        nameEnd = colonPos - 1
+    end
+
+    local shipName = trimString(line:sub(1, nameEnd))
+
+    -- Skip invalid entries
+    if #shipName < 3 then return nil end
+
+    local lowerName = shipName:lower()
+
+    -- Skip admiral/captain lines
+    if contains(lowerName, "lvl ") or contains(lowerName, "captain") or contains(lowerName, "admiral") then
+        return nil
+    end
+
+    -- Skip lines that look like the list title (contain " - " and end with " -")
+    if contains(shipName, " - ") and (shipName:sub(-2) == " -" or contains(shipName, "pts]")) then
+        return nil
+    end
+
+    return {name = shipName, quantity = quantity}
+end
+
+-- Finds matching cards by ship name
+function findMatchingCards(searchName)
+    local matches = {}
+    local searchLower = searchName:lower()
+
+    for i, card in ipairs(savedShipCards) do
+        local cardName = (card.name or "")
+        local cardLower = cardName:lower()
+
+        -- Exact match
+        if cardLower == searchLower then
+            table.insert(matches, i)
+        -- Card name contained in search name
+        elseif contains(searchLower, cardLower) then
+            table.insert(matches, i)
+        -- Search name contained in card name
+        elseif contains(cardLower, searchLower) then
+            table.insert(matches, i)
+        end
+    end
+
+    return matches
+end
+
+-- Utility: Trims whitespace from both ends of a string
+function trimString(str)
+    if not str then return "" end
+    local startPos = 1
+    while startPos <= #str do
+        local char = str:sub(startPos, startPos)
+        if char ~= " " and char ~= "\t" and char ~= "\r" and char ~= "\n" then
+            break
+        end
+        startPos = startPos + 1
+    end
+    local endPos = #str
+    while endPos >= 1 do
+        local char = str:sub(endPos, endPos)
+        if char ~= " " and char ~= "\t" and char ~= "\r" and char ~= "\n" then
+            break
+        end
+        endPos = endPos - 1
+    end
+    if startPos > endPos then return "" end
+    return str:sub(startPos, endPos)
+end
+
+-- Utility: Finds the first occurrence of a character
+function findChar(str, char)
+    for i = 1, #str do
+        if str:sub(i, i) == char then
+            return i
+        end
+    end
+    return nil
+end
+
+-- Utility: Checks if a string contains a substring
+function contains(str, substr)
+    if not str or not substr then return false end
+    if #substr > #str then return false end
+    for i = 1, #str - #substr + 1 do
+        local match = true
+        for j = 1, #substr do
+            if str:sub(i + j - 1, i + j - 1) ~= substr:sub(j, j) then
+                match = false
+                break
+            end
+        end
+        if match then return true end
+    end
+    return false
+end
+
+-- Utility: Checks if a string is numeric
+function isNumeric(str)
+    if not str or #str == 0 then return false end
+    for i = 1, #str do
+        local char = str:sub(i, i)
+        if char < "0" or char > "9" then
+            return false
+        end
+    end
+    return true
+end
+
+
+--EMBEDDED_DATA_START
+savedShipCards = {
+
+}
+
+fresh = false
