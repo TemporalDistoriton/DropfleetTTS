@@ -221,6 +221,7 @@ function ui_createModel(player, value, id)
     spawnObjectJSON({{
         json = objectJSON,
         position = {{x = pos.x, y = pos.y + 2, z = pos.z}},
+        rotation = {{x = 0, y = 180, z = 0}},
         callback_function = function(spawned_object)
             Wait.frames(function()
                 spawned_object.call("SetPlayerColor", {{playerColor = color}})
@@ -484,6 +485,8 @@ def main():
     groups: dict[str, list] = {}  # PDF_ID -> list of card entries for embedding
     for i, row in enumerate(rows):
         pdf_id = str(row.get('PDF ID', 'UNKNOWN')).strip()
+        if pdf_id == 'IND':
+            pdf_id = 'CIV'
         ship_name = str(row['Name'])
         ship_type = str(row.get('Type', ''))
         card_url = str(row.get('Card Image', ''))
