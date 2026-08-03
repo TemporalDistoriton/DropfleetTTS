@@ -1,0 +1,64 @@
+{
+    "Class": "Fossegrim",
+    "Type": "Pocket Battleship",
+    "Points": 195,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 6,
+        "Sig": 8,
+        "Hull": 15,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": [
+            "Cloak-1",
+            "Stealth"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Oculus Beam Array",
+            "Arc": "F",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Scald-1"
+            ]
+        },
+        {
+            "Name": "Plasma Tempest",
+            "Arc": "F/S",
+            "Att": 8,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Close Action",
+                "Fusillade-2",
+                "Scald-2"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Torpedo",
+            "Launch": 1,
+            "Special": [
+                "Limited-2"
+            ]
+        }
+    ],
+    "Rules": [
+        {
+            "Name": "Feature Carrier",
+            "Text": "At the start of the game, before players deploy, choose one Deployable Feature from the Scourge Deployable Features List. This Ship starts the game carrying that Deployable Feature."
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

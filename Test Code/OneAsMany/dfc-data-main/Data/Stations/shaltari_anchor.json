@@ -1,0 +1,28 @@
+{
+    "Fleet": "Shaltari",
+    "Name": "Anchor",
+    "Size": "Large",
+    "Points": 120,
+    "BaseSize": 50,
+    "Profile": {
+        "Scan": 12,
+        "Sig": 6,
+        "Hull": 24,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "-",
+        "G": "1",
+        "Special": [
+            "Shield-4+",
+            "Gateship-0"
+        ]
+    },
+    "Weapons": [],
+    "Load": [],
+    "Rules": [
+        {
+            "Name": "Voidspace Anchor",
+            "Text": "When an enemy Group within 6\" of this Space Station activates, that Group may only move up to half of its Thrust this activation regardless of selected Order."
+        }
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "Class": "Geneva",
+    "Type": "Command Cruiser",
+    "Points": 100,
+    "Tonnage": "M",
+    "BaseSize": 40,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 10,
+        "Sig": 6,
+        "Hull": 10,
+        "ES": "4+",
+        "KS": "3+",
+        "BS": "-",
+        "G": "1",
+        "Special": [
+            "Command Ship-1",
+            "Detector",
+            "Unique"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "UF-4200 Mass Driver Turrets",
+            "Arc": "F/S",
+            "Att": 4,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Fusillade-2"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [],
+    "Flavour": ""
+}

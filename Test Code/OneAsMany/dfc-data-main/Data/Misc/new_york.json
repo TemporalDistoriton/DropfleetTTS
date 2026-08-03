@@ -1,0 +1,12 @@
+{
+    "Fleet": "UCM",
+    "Class": "New York",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a New York Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "New York",
+    "CountsAsType": "Battleship",
+    "Availability": "RESIN"
+}

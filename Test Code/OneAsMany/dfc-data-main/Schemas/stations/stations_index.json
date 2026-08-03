@@ -1,0 +1,28 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://dfc/schemas/stations/stations_index.json",
+    "title": "DFC Stations Index",
+    "type": "object",
+    "required": ["SourceVersion", "Features", "GenericStations", "Armaments", "StationUpgrades", "FleetStations"],
+    "additionalProperties": false,
+    "properties": {
+        "SourceVersion":   { "type": "string" },
+        "Features": {
+            "type": "array",
+            "items": { "$ref": "https://dfc/schemas/defs.json#/$defs/Rule" }
+        },
+        "GenericStations": {
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "Armaments":        { "type": "string" },
+        "StationUpgrades": {
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "FleetStations": {
+            "type": "array",
+            "items": { "type": "string" }
+        }
+    }
+}

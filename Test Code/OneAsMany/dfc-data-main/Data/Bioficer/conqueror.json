@@ -1,0 +1,43 @@
+{
+    "Class": "Conqueror",
+    "Type": "Cruiser",
+    "Points": 75,
+    "Tonnage": "M",
+    "BaseSize": 40,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 8,
+        "Sig": 3,
+        "Hull": 7,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "-",
+        "G": "1-2",
+        "Special": [
+            "Porter S-1"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Heavy Lightvice",
+            "Arc": "F",
+            "Att": 5,
+            "Lock": "2+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Close Action",
+                "Focused"
+            ]
+        }
+    ],
+    "Load": [],
+    "Rules": [
+        {
+            "Name": "Tractor Beamer",
+            "Text": "At the end of this Ship's activation, you may pick a single friendly Ship with the Payload special rule within 6\". Move that ship up to 4\" in any direction, ."
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

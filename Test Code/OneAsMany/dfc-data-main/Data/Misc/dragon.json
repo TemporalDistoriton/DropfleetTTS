@@ -1,0 +1,12 @@
+{
+    "Fleet": "Scourge",
+    "Class": "Dragon",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Dragon Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Dragon",
+    "CountsAsType": "Battleship",
+    "Availability": "RESIN"
+}

@@ -1,0 +1,118 @@
+{
+    "Class": "Nephilim",
+    "Type": "Super Battleship",
+    "Points": 255,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 6,
+        "Scan": 8,
+        "Sig": 10,
+        "Hull": 20,
+        "ES": "3+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Heavy Plasma Beam Triad",
+            "Arc": "F",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 3,
+            "Type": "E",
+            "Special": [
+                "Close Action",
+                "Penetrator"
+            ]
+        },
+        {
+            "Name": "Furnace Fangs",
+            "Arc": "FN",
+            "Att": 6,
+            "Lock": "2+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Burnthrough-1",
+                "Crippling-Fire",
+                "Focused"
+            ]
+        },
+        {
+            "Name": "Furnace Fangs",
+            "Arc": "FN",
+            "Att": 6,
+            "Lock": "2+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Burnthrough-1",
+                "Crippling-Fire",
+                "Focused"
+            ]
+        },
+        {
+            "Name": "Oculus Beam Array",
+            "Arc": "F/S",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Scald-1"
+            ]
+        }
+    ],
+    "Load": [],
+    "Rules": [
+        {
+            "Name": "Keel Options",
+            "Text": "This Ship must take either a Cloaking Keel, gaining Stealth and Cloak-2, or an Engine Upgrade for +10 points, increasing Thrust by 3\"."
+        }
+    ],
+    "Upgrades": [
+        {
+            "Min": 1,
+            "Max": 1,
+            "Options": [
+                {
+                    "Name": "Cloaking Keel",
+                    "Cost": 0,
+                    "Effects": [
+                        {
+                            "Target": "Special",
+                            "Type": "append",
+                            "Value": "Stealth"
+                        },
+                        {
+                            "Target": "Special",
+                            "Type": "append",
+                            "Value": "Cloak-2"
+                        }
+                    ]
+                },
+                {
+                    "Name": "Engine Upgrade",
+                    "Cost": 10,
+                    "Effects": [
+                        {
+                            "Target": "Thrust",
+                            "Type": "add",
+                            "Value": 3
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "KnownShips": [
+        "Void Giant",
+        "Elysium's Hammer",
+        "The Loss of Victory",
+        "Sadness"
+    ],
+    "Flavour": "With its heavy plasma beam triad, the Nephilim is one of the most fearsome known ships within close action range. These vast energy weapons can core-out the largest opponents with searing plasma. Additionally, its quad furnace fangs and oculus beams enhance this monster's lethality. Lastly, like all Scourge super battleships, the class has been encountered either with stealth capabilities or extra drives, both of which help the Nephilim reach killing range."
+}

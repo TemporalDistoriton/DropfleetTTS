@@ -1,0 +1,40 @@
+{
+    "Class": "Lucifer",
+    "Type": "Battleship",
+    "Points": 205,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 11,
+        "Scan": 8,
+        "Sig": 10,
+        "Hull": 20,
+        "ES": "3+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Oculus Beam Array",
+            "Arc": "F/S",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Scald-1"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Fighters & Bombers",
+            "Launch": 5,
+            "Special": []
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

@@ -1,0 +1,12 @@
+{
+    "Fleet": "Resistance",
+    "Class": "Trident",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Nelson Grand Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Nelson",
+    "CountsAsType": "Grand Battleship",
+    "Availability": "RESIN"
+}

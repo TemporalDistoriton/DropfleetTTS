@@ -1,0 +1,40 @@
+{
+    "Class": "Matrix",
+    "Type": "Monitor",
+    "Points": 65,
+    "Tonnage": "L",
+    "BaseSize": 30,
+    "Profile": {
+        "Thrust": 6,
+        "Scan": 12,
+        "Sig": 3,
+        "Hull": 4,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1-2",
+        "Special": [
+            "Monitor"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Decon Blast",
+            "Arc": "F/S/R",
+            "Att": 4,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": []
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Boarding Pods",
+            "Launch": 2,
+            "Special": []
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

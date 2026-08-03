@@ -1,0 +1,44 @@
+{
+    "Class": "Ebisu",
+    "Type": "Tackling Cutter",
+    "Points": 23,
+    "Tonnage": "L",
+    "BaseSize": 30,
+    "Profile": {
+        "Thrust": 14,
+        "Scan": 6,
+        "Sig": 2,
+        "Hull": 2,
+        "ES": "6+",
+        "KS": "6+",
+        "BS": "-",
+        "G": "1-3",
+        "Special": [
+            "Impetuous",
+            "Rare",
+            "Vanguard-7\""
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Engine Needle",
+            "Arc": "FN",
+            "Att": 2,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Crippling-Navigation Offline"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Boarding Pods",
+            "Launch": 1,
+            "Special": []
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

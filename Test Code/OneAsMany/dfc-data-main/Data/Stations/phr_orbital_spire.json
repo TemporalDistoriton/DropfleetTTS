@@ -1,0 +1,44 @@
+{
+    "Fleet": "PHR",
+    "Name": "Orbital Spire",
+    "Size": "Large",
+    "Points": 145,
+    "BaseSize": 50,
+    "Profile": {
+        "Scan": 8,
+        "Sig": 6,
+        "Hull": 26,
+        "ES": "3+",
+        "KS": "4+",
+        "BS": "-",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Neutron Missiles",
+            "Arc": "F/S/R",
+            "Att": 4,
+            "Lock": "2+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Close Action",
+                "Crippling"
+            ]
+        },
+        {
+            "Name": "Station Turret Ring",
+            "Arc": "F/S/R",
+            "Att": 6,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Close Action"
+            ],
+            "Rule": "When you attack with this weapon, roll once and apply the roll to all enemy Groups within range."
+        }
+    ],
+    "Load": []
+}

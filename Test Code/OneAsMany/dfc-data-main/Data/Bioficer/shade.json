@@ -1,0 +1,66 @@
+{
+    "Class": "Shade",
+    "Type": "Pocket Battleship",
+    "Points": 225,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 10,
+        "Sig": 4,
+        "Hull": 14,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Bombardment Spine",
+            "Arc": "F/S/R",
+            "Att": 9,
+            "Lock": "5+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Alt-1",
+                "Bombardment"
+            ],
+            "Rule": "This weapon gains the Corruptor-2 special rule while on the Weapons Free order."
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Drop Pods",
+            "Launch": 4,
+            "Special": [
+                "Alt-1"
+            ]
+        },
+        {
+            "Load": "Boarding Pods",
+            "Launch": 2,
+            "Special": []
+        },
+        {
+            "Load": "Torpedoes",
+            "Launch": 2,
+            "Special": [
+                "Limited-4"
+            ]
+        }
+    ],
+    "Rules": [
+        {
+            "Name": "Feature Carrier",
+            "Text": "At the start of the game, before players deploy, choose from the Gravitational Lens or Ghost Orb Tower Deployable Feature. This Ship starts the game carrying the chosen Deployable Feature."
+        },
+        {
+            "Name": "High Velocity Boarding Pods",
+            "Text": "This Ship's Boarding Pods may be used against targets up to 6\" away."
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

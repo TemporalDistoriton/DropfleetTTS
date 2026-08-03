@@ -1,0 +1,12 @@
+{
+    "Fleet": "PHR",
+    "Class": "Scipio",
+    "Type": "Battlecruiser",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Priam Battlecruiser.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Priam",
+    "CountsAsType": "Battlecruiser",
+    "Availability": "EXCLUSIVE"
+}

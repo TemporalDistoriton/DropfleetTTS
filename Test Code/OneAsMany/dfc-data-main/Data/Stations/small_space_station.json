@@ -1,0 +1,25 @@
+{
+    "Name": "Small Space Station",
+    "Type": "Orbital Satellite",
+    "Points": 30,
+    "BaseSize": 30,
+    "Profile": {
+        "Scan": 6,
+        "Sig": 4,
+        "Hull": 10,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "-",
+        "G": "1",
+        "Special": []
+    },
+    "Hardpoints": {
+        "Armaments": 1,
+        "Features": 0
+    },
+    "MaxUpgrades": 1,
+    "UpgradeOptions": [
+        "Astrobotanical Lab",
+        "Defence Grid"
+    ]
+}

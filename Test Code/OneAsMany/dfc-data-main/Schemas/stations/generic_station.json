@@ -1,0 +1,18 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://dfc/schemas/stations/generic_station.json",
+    "title": "DFC Generic Space Station",
+    "type": "object",
+    "required": ["Name", "Type", "Points", "BaseSize", "Profile", "Hardpoints", "MaxUpgrades", "UpgradeOptions"],
+    "additionalProperties": false,
+    "properties": {
+        "Name":           { "type": "string" },
+        "Type":           { "type": "string" },
+        "Points":         { "type": "integer" },
+        "BaseSize":       { "type": "integer" },
+        "Profile":        { "$ref": "https://dfc/schemas/stations/defs.json#/$defs/StationProfile" },
+        "Hardpoints":     { "$ref": "https://dfc/schemas/stations/defs.json#/$defs/Hardpoints" },
+        "MaxUpgrades":    { "type": "integer", "minimum": 0 },
+        "UpgradeOptions": { "type": "array", "items": { "type": "string" } }
+    }
+}

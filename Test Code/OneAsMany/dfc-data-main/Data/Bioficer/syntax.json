@@ -1,0 +1,58 @@
+{
+    "Class": "Syntax",
+    "Type": "Pocket Battleship",
+    "Points": 175,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 10,
+        "Sig": 4,
+        "Hull": 14,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Decon Annihilator",
+            "Arc": "FN",
+            "Att": 12,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Reave-1"
+            ]
+        },
+        {
+            "Name": "Decon Blaster",
+            "Arc": "FN",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": []
+        },
+        {
+            "Name": "Decon Blaster",
+            "Arc": "FN",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": []
+        }
+    ],
+    "Load": [],
+    "Rules": [
+        {
+            "Name": "Feature Carrier",
+            "Text": "At the start of the game, before players deploy, choose from the Gravitational Lens or Ghost Orb Tower Deployable Feature. This Ship starts the game carrying the chosen Deployable Feature."
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

@@ -1,0 +1,12 @@
+{
+    "Fleet": "PHR",
+    "Class": "Rhadamanthus",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Rhadamanthus Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Rhadamanthus",
+    "CountsAsType": "Battleship",
+    "Availability": "RESIN"
+}

@@ -1,0 +1,12 @@
+{
+    "Fleet": "PHR",
+    "Class": "Prototype Bellerophon",
+    "Type": "Heavy Cruiser",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Bellerophon Heavy Cruiser.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Bellerophon",
+    "CountsAsType": "Heavy Cruiser",
+    "Availability": "RESIN"
+}

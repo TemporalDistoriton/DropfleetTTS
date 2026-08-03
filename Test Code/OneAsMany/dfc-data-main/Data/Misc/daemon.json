@@ -1,0 +1,12 @@
+{
+    "Fleet": "Scourge",
+    "Class": "Daemon",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Daemon Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Daemon",
+    "CountsAsType": "Battleship",
+    "Availability": "RESIN"
+}
