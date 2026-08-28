@@ -1,0 +1,79 @@
+{
+    "Admiral": "Enslaver",
+    "AdmiralLevel": 2,
+    "Class": "Raiju",
+    "Type": "Heavy Cruiser",
+    "AdmiralPoints": 45,
+    "ShipPoints": 125,
+    "Points": 170,
+    "Tonnage": "M",
+    "BaseSize": 40,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 6,
+        "Sig": 8,
+        "Hull": 12,
+        "ES": "4+",
+        "KS": "3+",
+        "BS": "-",
+        "G": "1",
+        "Special": [
+            "Cloak-2",
+            "Stealth"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Oculus Beam Crest",
+            "Arc": "F/S",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Scald-2"
+            ]
+        },
+        {
+            "Name": "Furnace Cannons",
+            "Arc": "FN",
+            "Att": 4,
+            "Lock": "2+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Burnthrough-1",
+                "Crippling-Fire",
+                "Focused"
+            ]
+        },
+        {
+            "Name": "Plasma Gale",
+            "Arc": "F/S",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Close Action",
+                "Scald-2"
+            ]
+        }
+    ],
+    "Load": [],
+    "Rules": [
+        {
+            "Name": "Doomed",
+            "Text": "Whenever you capture an enemy Ship or an enemy Ship is destroyed due to the Fire Crippling Effect, gain 2AP."
+        }
+    ],
+    "FleetAdmiralAbilities": 2,
+    "AdmiralAbilities": [
+        {
+            "Cost": "2AP",
+            "Name": "Infernal Maw",
+            "Effect": "After you roll to hit with a Furnace weapon, you may re-roll any of that weapon's attack dice (both hits and misses)."
+        }
+    ],
+    "Flavour": "The Raiju designated Enslaver is one of the most reviled Scourge warships encountered during the reconquest. This admiral is usually seen at the head of a formation designed to board and capture enemy ships. Leading a host of Hiruko's, Akuma's, and more recently, Ebisu class ships, this admiral seems to revel in the capture of helpless ships.\nIt is clear the reasons behind this, the Scourge lack for fresh supplies of hosts and without a new conquest they must make do with the relatively slim pickings afforded by battles in the void. Each ship they capture only adds to the enemy faced by humanity, thousands of capable sailors become unwilling hosts to the vile parasite.\nFortunately for the UCM, Enslaver has been seen in scant few combat areas, most notably counter-attacks against UCM forces during the reconquest. Months go by between sightings, suggesting lengthy transfers of personnel between engagements. Due to Enslaver's proclivity for capturing vessels, fleet command has issued fleet wide instructions to destroy this ship with extreme prejudice."
+}

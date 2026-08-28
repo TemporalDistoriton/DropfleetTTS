@@ -1,0 +1,12 @@
+{
+    "Fleet": "UCM",
+    "Class": "Saratoga",
+    "Type": "Light Cruiser",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a New Cairo Light Cruiser.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "New Cairo",
+    "CountsAsType": "Light Cruiser",
+    "Availability": "EXCLUSIVE"
+}

@@ -1,0 +1,12 @@
+{
+    "Fleet": "PHR",
+    "Class": "Sarpedon",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Sarpedon Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Sarpedon",
+    "CountsAsType": "Battleship",
+    "Availability": "RESIN"
+}

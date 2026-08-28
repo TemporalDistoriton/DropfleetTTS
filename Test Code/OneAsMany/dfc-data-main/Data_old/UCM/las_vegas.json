@@ -1,0 +1,44 @@
+{
+    "Class": "Las Vegas",
+    "Type": "Command Carrier",
+    "Points": 145,
+    "Tonnage": "M",
+    "BaseSize": 40,
+    "Profile": {
+        "Thrust": 7,
+        "Scan": 10,
+        "Sig": 6,
+        "Hull": 12,
+        "ES": "4+",
+        "KS": "3+",
+        "BS": "6+",
+        "G": "1",
+        "Special": [
+            "Command Ship-1",
+            "Detector",
+            "Unique"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "UF-6400 Mass Driver Turrets",
+            "Arc": "F/S",
+            "Att": 4,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Critical-1"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Fighters & Bombers",
+            "Launch": 2,
+            "Special": []
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

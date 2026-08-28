@@ -1,0 +1,12 @@
+{
+    "Fleet": "Scourge",
+    "Class": "Manticore",
+    "Type": "Battlecruiser",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Banshee Battlecruiser.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Banshee",
+    "CountsAsType": "Battlecruiser",
+    "Availability": "EXCLUSIVE"
+}

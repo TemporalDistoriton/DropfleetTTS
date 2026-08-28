@@ -1,0 +1,55 @@
+{
+    "Class": "Bucharest",
+    "Type": "Cruiser",
+    "Points": 90,
+    "Tonnage": "M",
+    "BaseSize": 40,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 6,
+        "Sig": 6,
+        "Hull": 10,
+        "ES": "4+",
+        "KS": "3+",
+        "BS": "-",
+        "G": "1-2",
+        "Special": [
+            "Rare"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Taipan Laser Turrets",
+            "Arc": "F/S",
+            "Att": 2,
+            "Lock": "2+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Scald-2"
+            ]
+        },
+        {
+            "Name": "Piranha Missile Turrets",
+            "Arc": "F/S",
+            "Att": 6,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Close Action"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Medium Torpedo",
+            "Launch": 1,
+            "Special": [
+                "Limited-1"
+            ]
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

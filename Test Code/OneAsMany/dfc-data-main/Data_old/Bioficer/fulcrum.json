@@ -1,0 +1,34 @@
+{
+    "Class": "Fulcrum",
+    "Type": "Frigate",
+    "Points": 37,
+    "Tonnage": "L",
+    "BaseSize": 30,
+    "Profile": {
+        "Thrust": 14,
+        "Scan": 10,
+        "Sig": 1,
+        "Hull": 3,
+        "ES": "5+",
+        "KS": "5+",
+        "BS": "-",
+        "G": "2-6",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Barb Spiker",
+            "Arc": "FN",
+            "Att": 1,
+            "Lock": "2+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Reave-2"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [],
+    "Flavour": ""
+}

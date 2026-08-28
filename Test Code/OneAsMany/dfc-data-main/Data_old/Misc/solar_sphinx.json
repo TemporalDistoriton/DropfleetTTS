@@ -1,0 +1,12 @@
+{
+    "Fleet": "Scourge",
+    "Class": "Solar Sphinx",
+    "Type": "Cruiser",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Sphinx Cruiser.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Sphinx",
+    "CountsAsType": "Cruiser",
+    "Availability": "RESIN"
+}

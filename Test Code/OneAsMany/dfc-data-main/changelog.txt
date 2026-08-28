@@ -1,0 +1,176 @@
+================================================================================
+JSON DATA CHANGELOG
+================================================================================
+
+Baseline : D:\DropFleetTTS_Repo\DropfleetTTS\Test Code\OneAsMany\dfc-data-main\Data_old
+Current  : D:\DropFleetTTS_Repo\DropfleetTTS\Test Code\OneAsMany\dfc-data-main\Data
+
+SUMMARY
+--------------------------------------------------------------------------------
+NEW         : 5
+REMOVED     : 0
+MODIFIED    : 6
+UNCHANGED   : 469
+ERROR       : 0
+
+================================================================================
+MODIFIED: Civilian\_ships.json
+================================================================================
+
+CHANGED: Ships[3]
+  OLD: "mab_67_fuel_transport.json"
+  NEW: "mk_mass_transporter.json"
+
+CHANGED: Ships[4]
+  OLD: "nirvana.json"
+  NEW: "mab_67_fuel_transport.json"
+
+CHANGED: Ships[5]
+  OLD: "precedent_one.json"
+  NEW: "nirvana.json"
+
+CHANGED: Ships[6]
+  OLD: "slm9_resupply_hauler.json"
+  NEW: "precedent_one.json"
+
+CHANGED: Ships[7]
+  OLD: "ttype_tugboat.json"
+  NEW: "slm9_resupply_hauler.json"
+
+CHANGED: Ships[8]
+  OLD: "ex7_packet_runner.json"
+  NEW: "ttype_tugboat.json"
+
+CHANGED: Ships[9]
+  OLD: "affluence_liner.json"
+  NEW: "ex7_packet_runner.json"
+
+CHANGED: Ships[10]
+  OLD: "dhtype_penal_transport.json"
+  NEW: "affluence_liner.json"
+
+CHANGED: Ships[11]
+  OLD: "jahtar_startrader.json"
+  NEW: "dhtype_penal_transport.json"
+
+CHANGED: Ships[12]
+  OLD: "mtype_barge.json"
+  NEW: "jahtar_startrader.json"
+
+CHANGED: Ships[13]
+  OLD: "princess_liner.json"
+  NEW: "mtype_barge.json"
+
+CHANGED: Ships[14]
+  OLD: "obv64_oblivion_barge.json"
+  NEW: "princess_liner.json"
+
+CHANGED: Ships[15]
+  OLD: "argonaut.json"
+  NEW: "obv64_oblivion_barge.json"
+
+CHANGED: Ships[16]
+  OLD: "type87_terminus_harvester.json"
+  NEW: "argonaut.json"
+
+CHANGED: Ships[17]
+  OLD: "vx22_flenser.json"
+  NEW: "type87_terminus_harvester.json"
+
+CHANGED: Ships[18]
+  OLD: "prk91_provenance_ark.json"
+  NEW: "vx22_flenser.json"
+
+ADDED: Ships[19]
+  NEW: "prk91_provenance_ark.json"
+
+CHANGED: SourceVersion
+  OLD: "260801"
+  NEW: "260901"
+
+================================================================================
+NEW: Civilian\mk_mass_transporter.json
+================================================================================
+
+File exists in Data but not Data_old.
+
+================================================================================
+MODIFIED: PHR\_fleet.json
+================================================================================
+
+ADDED: Heroes[1]
+  NEW: "camilla_felix.json"
+
+CHANGED: SourceVersion
+  OLD: "260626"
+  NEW: "260828"
+
+================================================================================
+NEW: PHR\camilla_felix.json
+================================================================================
+
+File exists in Data but not Data_old.
+
+================================================================================
+MODIFIED: Shaltari\nefertem_of_the_dawn.json
+================================================================================
+
+CHANGED: KnownShips[0]
+  OLD: "Invisible Night"
+  NEW: "Invisible Light"
+
+CHANGED: Ship
+  OLD: "Invisible Night"
+  NEW: "Invisible Light"
+
+================================================================================
+MODIFIED: Stations\_stations.json
+================================================================================
+
+ADDED: FleetStations[14]
+  NEW: "bioficer_hypershredder.json"
+
+ADDED: FleetStations[15]
+  NEW: "bioficer_hypersummoner.json"
+
+CHANGED: SourceVersion
+  OLD: "250818"
+  NEW: "250828"
+
+================================================================================
+NEW: Stations\bioficer_hypershredder.json
+================================================================================
+
+File exists in Data but not Data_old.
+
+================================================================================
+NEW: Stations\bioficer_hypersummoner.json
+================================================================================
+
+File exists in Data but not Data_old.
+
+================================================================================
+MODIFIED: UCM\_fleet.json
+================================================================================
+
+ADDED: Heroes[1]
+  NEW: "frances_mendoza.json"
+
+CHANGED: SourceVersion
+  OLD: "260529"
+  NEW: "260828"
+
+================================================================================
+NEW: UCM\frances_mendoza.json
+================================================================================
+
+File exists in Data but not Data_old.
+
+================================================================================
+MODIFIED: UCM\kyiv.json
+================================================================================
+
+CHANGED: Flavour
+  OLD: "The Kiev is an interesting vessel, in that it features a pair of super-heavy, UF-9000 series mass drivers in a fixed position. These impressive weapons are heavier gauge than those mounted in almost any other UCMF warship, save the mighty dreadnoughts. The mission role of Kiev class is to hunt and kill the most heavily armoured enemy vessels with swift brutality. They are unsubtle sledgehammers and the bane of enemy flagships. Many an enemy admiral has met their ignominious deaths at the hands of this smaller adversary since its inception in the 2640s.\nThese weapons are also large enough in gauge to fire new and experimental munitions featuring molecular repulsion technology. These can cut through atmosphere and reach targets normally safe from the attentions of orbiting spacecraft.\nIt is also an unusual ship due to its triple-hull configuration, borrowing core superstructure elements from standard UCMF destroyers, although with reinforced armour superior to that of most other light vessels. Although artificial gravity creates the comforting illusion of \"up and down\" as usual, the fact that other segments of the ship are oriented differently never ceases to confuse fresh crew members!"
+  NEW: "The Kyiv is an interesting vessel, in that it features a pair of super-heavy, UF-9000 series mass drivers in a fixed position. These impressive weapons are heavier gauge than those mounted in almost any other UCMF warship, save the mighty dreadnoughts. The mission role of Kyiv class is to hunt and kill the most heavily armoured enemy vessels with swift brutality. They are unsubtle sledgehammers and the bane of enemy flagships. Many an enemy admiral has met their ignominious deaths at the hands of this smaller adversary since its inception in the 2640s.\nThese weapons are also large enough in gauge to fire new and experimental munitions featuring molecular repulsion technology. These can cut through atmosphere and reach targets normally safe from the attentions of orbiting spacecraft.\nIt is also an unusual ship due to its triple-hull configuration, borrowing core superstructure elements from standard UCMF destroyers, although with reinforced armour superior to that of most other light vessels. Although artificial gravity creates the comforting illusion of \"up and down\" as usual, the fact that other segments of the ship are oriented differently never ceases to confuse fresh crew members!"
+

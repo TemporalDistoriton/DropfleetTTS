@@ -1,0 +1,73 @@
+{
+    "Admiral": "Atom",
+    "AdmiralLevel": 2,
+    "Class": "Scion",
+    "Type": "Battlecruiser",
+    "AdmiralPoints": 45,
+    "ShipPoints": 150,
+    "Points": 195,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 10,
+        "Sig": 4,
+        "Hull": 12,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": [
+            "Vanguard-6\""
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Godray Lightvice",
+            "Profiles": [
+                {
+                    "Name": "Anti-Ship",
+                    "Arc": "F/S",
+                    "Att": 5,
+                    "Lock": "2+",
+                    "DMG": 3,
+                    "Type": "K",
+                    "Special": [
+                        "Alt-1",
+                        "Bloom-1",
+                        "Close Action",
+                        "Focused",
+                        "Scald-1"
+                    ]
+                },
+                {
+                    "Name": "Bombardment",
+                    "Arc": "F/S",
+                    "Att": 5,
+                    "Lock": "4+",
+                    "DMG": 3,
+                    "Type": "K",
+                    "Special": [
+                        "Alt-1",
+                        "Bloom-1",
+                        "Bombardment",
+                        "Close Action",
+                        "Focused",
+                        "Scald-1"
+                    ]
+                }
+            ],
+            "Rule": "This weapon's Bombardment profile may target Dropsites within scan range as if it did not have the Close Action special rule.\nIf either of this weapon's profiles target a Dropsite containing a friendly Bioficer Deployable Feature, friendly Battalions assigned to that Feature ignore Collateral Damage due to this weapon."
+        }
+    ],
+    "Load": [],
+    "FleetAdmiralAbilities": 1,
+    "AdmiralAbilities": [
+        {
+            "Cost": "1AP",
+            "Name": "Vice Lightly",
+            "Effect": "When you assign targets to a weapon with \"Lightvice\" in its name, that weapon ignores its Focused rule for that attack."
+        }
+    ],
+    "Flavour": ""
+}

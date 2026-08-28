@@ -1,0 +1,12 @@
+{
+    "Fleet": "PHR",
+    "Class": "Kairos",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Kairos Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Kairos",
+    "CountsAsType": "Battleship",
+    "Availability": "RESIN"
+}

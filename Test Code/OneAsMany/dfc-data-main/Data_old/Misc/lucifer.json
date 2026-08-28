@@ -1,0 +1,12 @@
+{
+    "Fleet": "Scourge",
+    "Class": "Lucifer",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Lucifer Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Lucifer",
+    "CountsAsType": "Battleship",
+    "Availability": "RESIN"
+}

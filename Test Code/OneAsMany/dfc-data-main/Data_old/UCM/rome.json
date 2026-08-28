@@ -1,0 +1,45 @@
+{
+    "Class": "Rome",
+    "Type": "Battlecruiser",
+    "Points": 185,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 8,
+        "Sig": 6,
+        "Hull": 14,
+        "ES": "4+",
+        "KS": "3+",
+        "BS": "6+",
+        "G": "1",
+        "Special": [
+            "Aegis-6",
+            "Vanguard-4\""
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "UF-4200 Mass Driver Turrets",
+            "Arc": "F/S",
+            "Att": 4,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Fusillade-2"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Heavy Torpedo",
+            "Launch": 2,
+            "Special": [
+                "Limited-2"
+            ]
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

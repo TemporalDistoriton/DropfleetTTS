@@ -1,0 +1,75 @@
+{
+    "Class": "Agamemnon",
+    "Type": "Battlecruiser",
+    "Points": 160,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 8,
+        "Sig": 6,
+        "Hull": 15,
+        "ES": "3+",
+        "KS": "4+",
+        "BS": "6+",
+        "G": "1",
+        "Special": [
+            "Vanguard-4\""
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Light Calibre Broadside",
+            "Arc": "B",
+            "Att": 6,
+            "Lock": "5+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Calibre-L",
+                "Re-Entry",
+                "Volley-2"
+            ]
+        },
+        {
+            "Name": "Light Calibre Broadside",
+            "Arc": "B",
+            "Att": 6,
+            "Lock": "5+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Calibre-L",
+                "Re-Entry",
+                "Volley-2"
+            ]
+        },
+        {
+            "Name": "Medium Calibre Broadside",
+            "Arc": "B",
+            "Att": 3,
+            "Lock": "4+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Fusillade-1",
+                "Volley-2"
+            ]
+        },
+        {
+            "Name": "Medium Calibre Broadside",
+            "Arc": "B",
+            "Att": 3,
+            "Lock": "4+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Fusillade-1",
+                "Volley-2"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [],
+    "Flavour": ""
+}

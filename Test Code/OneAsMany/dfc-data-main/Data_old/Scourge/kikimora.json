@@ -1,0 +1,62 @@
+{
+    "Class": "Kikimora",
+    "Type": "Pocket Battleship",
+    "Points": 230,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 6,
+        "Sig": 8,
+        "Hull": 15,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": [
+            "Cloak-1",
+            "Stealth"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Oculus Beam Array",
+            "Arc": "F",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Scald-1"
+            ]
+        },
+        {
+            "Name": "Furnace Incisors",
+            "Arc": "FN",
+            "Att": 6,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Burnthrough-1",
+                "Crippling-2xFire",
+                "Focused"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Fighters & Bombers",
+            "Launch": 4,
+            "Special": []
+        }
+    ],
+    "Rules": [
+        {
+            "Name": "Feature Carrier",
+            "Text": "At the start of the game, before players deploy, choose one Deployable Feature from the Scourge Deployable Features List. This Ship starts the game carrying that Deployable Feature."
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

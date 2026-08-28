@@ -1,0 +1,12 @@
+{
+    "Fleet": "Scourge",
+    "Class": "Basilisk",
+    "Type": "Battlecruiser",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as an Akuma Battlecruiser.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Akuma",
+    "CountsAsType": "Battlecruiser",
+    "Availability": "EXCLUSIVE"
+}

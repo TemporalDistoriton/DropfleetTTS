@@ -1,0 +1,57 @@
+{
+    "Class": "Cato",
+    "Type": "Pocket Battleship",
+    "Points": 185,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 8,
+        "Sig": 6,
+        "Hull": 16,
+        "ES": "3+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Medium Calibre Double Broadside",
+            "Arc": "B",
+            "Att": 6,
+            "Lock": "4+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Fusillade-1",
+                "Volley-2"
+            ]
+        },
+        {
+            "Name": "Hornet Drone Locus",
+            "Arc": "F/S/R",
+            "Att": 8,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Close Action"
+            ]
+        },
+        {
+            "Name": "Glaive Lance",
+            "Arc": "FN",
+            "Att": 3,
+            "Lock": "2+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Overcharge"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [],
+    "Flavour": ""
+}
