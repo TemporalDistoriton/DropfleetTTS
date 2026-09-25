@@ -1,0 +1,49 @@
+{
+    "Class": "Catastrophe",
+    "Type": "Heavy Cruiser",
+    "Points": 110,
+    "Tonnage": "M",
+    "BaseSize": 40,
+    "Profile": {
+        "Thrust": 7,
+        "Scan": 8,
+        "Sig": 4,
+        "Hull": 9,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": [
+            "Porter S-1"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Heavy Lightvice",
+            "Arc": "F",
+            "Att": 5,
+            "Lock": "2+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Close Action",
+                "Focused"
+            ]
+        },
+        {
+            "Name": "Thermator",
+            "Arc": "F",
+            "Att": 3,
+            "Lock": "4+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Overcharge",
+                "Scald-1"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [],
+    "Flavour": ""
+}

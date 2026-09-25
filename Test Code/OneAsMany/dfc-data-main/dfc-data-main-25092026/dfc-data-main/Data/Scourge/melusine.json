@@ -1,0 +1,73 @@
+{
+    "Class": "Melusine",
+    "Type": "Pocket Battleship",
+    "Points": 255,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 6,
+        "Sig": 8,
+        "Hull": 15,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Oculus Beam Array",
+            "Arc": "F",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Scald-1"
+            ]
+        },
+        {
+            "Name": "Oculus Beam Phalanx",
+            "Arc": "F/S",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Scald-1",
+                "Volley-2"
+            ]
+        },
+        {
+            "Name": "Magneton Lash",
+            "Arc": "FN",
+            "Att": 4,
+            "Lock": "*",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Calibre-H/C",
+                "Close Action",
+                "Mauler",
+                "Penetrator"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Torpedo",
+            "Launch": 1,
+            "Special": [
+                "Limited-2"
+            ]
+        },
+        {
+            "Load": "Fighters & Bombers",
+            "Launch": 4,
+            "Special": []
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

@@ -1,0 +1,32 @@
+{
+    "Fleet": "Scourge",
+    "Name": "Ephyra",
+    "Size": "Small",
+    "Points": 65,
+    "BaseSize": 30,
+    "Profile": {
+        "Scan": 6,
+        "Sig": 4,
+        "Hull": 8,
+        "ES": "3+",
+        "KS": "4+",
+        "BS": "-",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Oculus Ward",
+            "Arc": "F/S/R",
+            "Att": 3,
+            "Lock": "4+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Close Action",
+                "Scald-1"
+            ]
+        }
+    ],
+    "Load": []
+}

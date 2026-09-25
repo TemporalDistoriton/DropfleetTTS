@@ -1,0 +1,64 @@
+{
+    "Class": "Scoria",
+    "Type": "Heavy Cruiser",
+    "Points": 175,
+    "Tonnage": "M",
+    "BaseSize": 40,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 12,
+        "Sig": 6,
+        "Hull": 11,
+        "ES": "5+",
+        "KS": "4+",
+        "BS": "-",
+        "G": "1",
+        "Special": [
+            "Shield-4+"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Particle Lance",
+            "Arc": "FN",
+            "Att": 1,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "C",
+            "Special": [
+                "Critical-1"
+            ]
+        },
+        {
+            "Name": "Particle Lance",
+            "Arc": "FN",
+            "Att": 1,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "C",
+            "Special": [
+                "Critical-1"
+            ]
+        },
+        {
+            "Name": "Disintegrator Battery",
+            "Arc": "F/S",
+            "Att": 5,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Reave-1"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Fighters & Bombers",
+            "Launch": 2,
+            "Special": []
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

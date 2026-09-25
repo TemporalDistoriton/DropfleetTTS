@@ -1,0 +1,12 @@
+{
+    "Fleet": "PHR",
+    "Class": "Leonidas",
+    "Type": "Battlecruiser",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as an Agamemnon Battlecruiser.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Agamemnon",
+    "CountsAsType": "Battlecruiser",
+    "Availability": "EXCLUSIVE"
+}

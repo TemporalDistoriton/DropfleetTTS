@@ -1,0 +1,12 @@
+{
+    "Fleet": "Shaltari",
+    "Class": "Diamond",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Diamond Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Diamond",
+    "CountsAsType": "Battleship",
+    "Availability": "RESIN"
+}

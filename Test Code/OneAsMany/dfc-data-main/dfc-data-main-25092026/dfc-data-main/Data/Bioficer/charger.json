@@ -1,0 +1,36 @@
+{
+    "Class": "Charger",
+    "Type": "Light Cruiser",
+    "Points": 75,
+    "Tonnage": "M",
+    "BaseSize": 40,
+    "Profile": {
+        "Thrust": 10,
+        "Scan": 11,
+        "Sig": 2,
+        "Hull": 5,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "-",
+        "G": "1-3",
+        "Special": [
+            "Porter S-1"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Barb Launcher",
+            "Arc": "FN",
+            "Att": 1,
+            "Lock": "2+",
+            "DMG": 4,
+            "Type": "K",
+            "Special": [
+                "Reave-2"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [],
+    "Flavour": ""
+}

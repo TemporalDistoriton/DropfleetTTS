@@ -1,0 +1,12 @@
+{
+    "Fleet": "Resistance",
+    "Class": "Amazon",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Drake Grand Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Drake",
+    "CountsAsType": "Grand Battleship",
+    "Availability": "RESIN"
+}

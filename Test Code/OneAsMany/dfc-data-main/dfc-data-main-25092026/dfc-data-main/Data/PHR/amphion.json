@@ -1,0 +1,65 @@
+{
+    "Class": "Amphion",
+    "Type": "Battleship",
+    "Points": 230,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 6,
+        "Scan": 10,
+        "Sig": 10,
+        "Hull": 22,
+        "ES": "3+",
+        "KS": "3+",
+        "BS": "5+",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Energy Glaives",
+            "Arc": "B",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Overcharge",
+                "Volley-2"
+            ]
+        },
+        {
+            "Name": "Energy Glaives",
+            "Arc": "B",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Overcharge",
+                "Volley-2"
+            ]
+        },
+        {
+            "Name": "Meganova Laser",
+            "Arc": "FN",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Penetrator",
+                "Flash-2",
+                "Focused",
+                "Volley-2"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [
+        "Wrath of Zeus",
+        "Thunderbolt",
+        "Elemental"
+    ],
+    "Flavour": "The Amphion was the first recorded vessel to utilise the Republic's latest battleship superstructure. This evolution in post-human naval architecture features miniaturised, hyper-efficient core systems and thus enlarged internal spaces. An expanded power matrix allows it to accommodate Energy Glaive broadsides previously only seen aboard dreadnoughts as well as a ventral meganova laser."
+}

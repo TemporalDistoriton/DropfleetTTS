@@ -1,0 +1,68 @@
+{
+    "Class": "Bannik",
+    "Type": "Pocket Battleship",
+    "Points": 250,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 6,
+        "Sig": 8,
+        "Hull": 15,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": [
+            "Command Ship-1"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Oculus Beam Array",
+            "Arc": "F",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Scald-1"
+            ]
+        },
+        {
+            "Name": "Furnace Incisors",
+            "Arc": "FN",
+            "Att": 6,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Burnthrough-1",
+                "Crippling-2xFire",
+                "Focused"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Torpedo",
+            "Launch": 1,
+            "Special": [
+                "Limited-2"
+            ]
+        },
+        {
+            "Load": "Fighters & Bombers",
+            "Launch": 4,
+            "Special": []
+        }
+    ],
+    "Rules": [
+        {
+            "Name": "Oculus Booster",
+            "Text": "If this Ship is on an order that allows it to attack, this Ship may forgo one allowed Weapon use during its activation. If it does, at the end of this Ship's activation, you may place an Oculus token on an enemy Group in line of sight in this Ship's Front Arc. Unused Oculus tokens placed by this Ship persist between rounds and are only removed when this Ship would place another Oculus token or when a Ship with an Oculus token goes on the Silent Running order.\nWhen you assign \"Oculus\" weapons to a Group that has an Oculus Token and is within Scan range of the attacking Group, you may remove the token. If you do, one of the Group's \"Oculus\" Weapon Systems' Type becomes Core against that Group for that attack."
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

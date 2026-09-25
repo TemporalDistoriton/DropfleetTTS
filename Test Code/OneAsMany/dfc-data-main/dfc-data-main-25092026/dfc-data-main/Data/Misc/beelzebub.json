@@ -1,0 +1,12 @@
+{
+    "Fleet": "Scourge",
+    "Class": "Beelzebub",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Beelzebub Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Beelzebub",
+    "CountsAsType": "Battleship",
+    "Availability": "RESIN"
+}

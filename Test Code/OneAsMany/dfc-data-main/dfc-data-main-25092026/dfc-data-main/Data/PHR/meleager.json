@@ -1,0 +1,48 @@
+{
+    "Class": "Meleager",
+    "Type": "Blockade Runner",
+    "Points": 55,
+    "Tonnage": "L",
+    "BaseSize": 30,
+    "Profile": {
+        "Thrust": 12,
+        "Scan": 8,
+        "Sig": 2,
+        "Hull": 6,
+        "ES": "4+",
+        "KS": "5+",
+        "BS": "-",
+        "G": "1-3",
+        "Special": [
+            "Rare"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Kingfisher Drones",
+            "Arc": "F/S/R",
+            "Att": 5,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Close Action",
+                "Re-Entry"
+            ]
+        },
+        {
+            "Name": "Energy Glaive Pair",
+            "Arc": "FN",
+            "Att": 2,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Overcharge"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [],
+    "Flavour": ""
+}

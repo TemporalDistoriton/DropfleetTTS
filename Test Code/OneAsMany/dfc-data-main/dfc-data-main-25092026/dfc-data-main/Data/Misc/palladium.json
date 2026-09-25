@@ -1,0 +1,12 @@
+{
+    "Fleet": "Shaltari",
+    "Class": "Palladium",
+    "Type": "Battlecruiser",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Sapphire Battlecruiser.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Sapphire",
+    "CountsAsType": "Battlecruiser",
+    "Availability": "EXCLUSIVE"
+}

@@ -1,0 +1,12 @@
+{
+    "Fleet": "Shaltari",
+    "Class": "Aaru Emerald",
+    "Type": "Mothership",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as an Emerald Mothership.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Emerald",
+    "CountsAsType": "Mothership",
+    "Availability": "RESIN"
+}

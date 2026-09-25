@@ -1,0 +1,47 @@
+{
+    "Class": "Otera",
+    "Type": "Light Cruiser",
+    "Points": 80,
+    "Tonnage": "M",
+    "BaseSize": 40,
+    "Profile": {
+        "Thrust": 10,
+        "Scan": 8,
+        "Sig": 6,
+        "Hull": 9,
+        "ES": "3+",
+        "KS": "4+",
+        "BS": "-",
+        "G": "1-3",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Bombardment Battery",
+            "Arc": "F/S/R",
+            "Att": 8,
+            "Lock": "5+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Bombardment"
+            ]
+        },
+        {
+            "Name": "Light Calibre Broadside",
+            "Arc": "B",
+            "Att": 6,
+            "Lock": "5+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Calibre-L",
+                "Re-entry",
+                "Volley-2"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [],
+    "Flavour": ""
+}

@@ -1,0 +1,65 @@
+{
+    "Class": "Actinium",
+    "Type": "Battleship",
+    "Points": 245,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 12,
+        "Sig": 8,
+        "Hull": 18,
+        "ES": "4+",
+        "KS": "3+",
+        "BS": "5+",
+        "G": "1",
+        "Special": [
+            "Shield-4+"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Disintegrator Battery",
+            "Arc": "F/S",
+            "Att": 5,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Reave-1",
+                "Volley-2"
+            ]
+        },
+        {
+            "Name": "Gravitic Beamer",
+            "Arc": "F/S",
+            "Att": 5,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Impel-1",
+                "Re-Entry"
+            ]
+        },
+        {
+            "Name": "Electrosurge Projectors",
+            "Arc": "B",
+            "Att": 3,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": [
+                "Status",
+                "Volley-2"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [
+        "Diplomat",
+        "Aaru-born",
+        "Our Distain"
+    ],
+    "Flavour": "The Actinium is a supremely challenging and disruptive opponent. It's broadside Elecrosurge Projectors are designed to lash a ship's core systems with pulsed directed energy surges, while its Gravitic Beamer crushes and shoves thousands of tons of enemy starship with localised hypergravity."
+}

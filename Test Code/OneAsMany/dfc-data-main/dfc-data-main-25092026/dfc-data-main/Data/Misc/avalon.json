@@ -1,0 +1,12 @@
+{
+    "Fleet": "UCM",
+    "Class": "Avalon",
+    "Type": "Cruiser",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Perth Battlecruiser.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Perth",
+    "CountsAsType": "Battlecruiser",
+    "Availability": "EXCLUSIVE"
+}

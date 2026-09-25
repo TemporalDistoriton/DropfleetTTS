@@ -1,0 +1,52 @@
+{
+    "Class": "Iowa",
+    "Type": "Old Battleship",
+    "Points": 175,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 7,
+        "Scan": 6,
+        "Sig": 8,
+        "Hull": 15,
+        "ES": "3+",
+        "KS": "5+",
+        "BS": "5+",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Heavy Vent Cannon Turrets",
+            "Arc": "F/S",
+            "Att": 4,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Fusillade-1",
+                "Overcharge",
+                "Reave-1"
+            ]
+        },
+        {
+            "Name": "NC-16 Missile Battery",
+            "Arc": "F/S/R",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Close Action"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [
+        "Ardent",
+        "Queen Bess (Independents)",
+        "Iowa",
+        "Great Founder (Kalium)"
+    ],
+    "Flavour": "Much rarer than its sister classes, the Iowa was the earliest known testbed of vent cannon technology. It mounts a pair of turreted heavy vent canons by dispensing with any broadside armament, freeing up space for a much enlarged, antique power core. Ventral NC-16 missiles complete the Iowa's armament, given their negligible power drain. Like all Old Battleships, the Iowa has poor scanners and point defences by modern standards, necessitating careful use."
+}

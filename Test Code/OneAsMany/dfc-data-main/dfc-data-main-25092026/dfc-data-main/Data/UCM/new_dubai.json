@@ -1,0 +1,74 @@
+{
+    "Class": "New Dubai",
+    "Type": "Pocket Battleship",
+    "Points": 215,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 7,
+        "Scan": 8,
+        "Sig": 6,
+        "Hull": 15,
+        "ES": "4+",
+        "KS": "3+",
+        "BS": "5+",
+        "G": "1",
+        "Special": [
+            "Aegis-6"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Arowana Missile Turrets",
+            "Arc": "F/S/R",
+            "Att": 6,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Close Action",
+                "Scald-1"
+            ]
+        },
+        {
+            "Name": "Arowana Missile Turrets",
+            "Arc": "F/S/R",
+            "Att": 6,
+            "Lock": "3+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Close Action",
+                "Scald-1"
+            ]
+        },
+        {
+            "Name": "Swordfish Missile Bays",
+            "Arc": "F/S/R",
+            "Att": 8,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Close Action"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Heavy Torpedo",
+            "Launch": 2,
+            "Special": [
+                "Limited-2"
+            ]
+        }
+    ],
+    "Rules": [
+        {
+            "Name": "Feature Carrier",
+            "Text": "At the start of the game, before players deploy, choose one Deployable Feature from the UCM Deployable Features List. This Ship starts the game carrying that Deployable Feature."
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

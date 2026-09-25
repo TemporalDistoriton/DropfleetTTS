@@ -1,0 +1,31 @@
+{
+    "Class": "Lander Cell",
+    "Type": "Cell",
+    "Points": 15,
+    "Tonnage": "L",
+    "BaseSize": 30,
+    "Profile": {
+        "Thrust": 2,
+        "Scan": 8,
+        "Sig": 1,
+        "Hull": 2,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "6+",
+        "G": "-",
+        "Special": [
+            "Payload S-1",
+            "Vectored"
+        ]
+    },
+    "Weapons": [],
+    "Load": [
+        {
+            "Load": "Bulk Landers",
+            "Launch": 2,
+            "Special": []
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

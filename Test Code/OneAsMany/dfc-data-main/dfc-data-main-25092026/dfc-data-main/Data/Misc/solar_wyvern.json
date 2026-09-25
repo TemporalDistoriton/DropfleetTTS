@@ -1,0 +1,12 @@
+{
+    "Fleet": "Scourge",
+    "Class": "Solar Wyvern",
+    "Type": "Cruiser",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Wyvern Cruiser.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Wyvern",
+    "CountsAsType": "Cruiser",
+    "Availability": "RESIN"
+}

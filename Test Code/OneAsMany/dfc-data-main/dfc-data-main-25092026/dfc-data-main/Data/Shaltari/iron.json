@@ -1,0 +1,77 @@
+{
+    "Class": "Iron",
+    "Type": "Supercarrier",
+    "Points": 275,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 12,
+        "Sig": 8,
+        "Hull": 18,
+        "ES": "4+",
+        "KS": "3+",
+        "BS": "5+",
+        "G": "1",
+        "Special": [
+            "Shield-4+"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Harpoon Deluge",
+            "Arc": "F/S/R",
+            "Att": 8,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Close Action"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Torpedo",
+            "Launch": 2,
+            "Special": [
+                "Limited-4"
+            ]
+        },
+        {
+            "Load": "Bulk Landers",
+            "Launch": 2,
+            "Special": []
+        },
+        {
+            "Load": "Fighters & Bombers",
+            "Launch": 4,
+            "Special": []
+        }
+    ],
+    "Rules": [
+        {
+            "Name": "Drive Augmentation",
+            "Text": "This Ship may take a Drive Augmentation for +35 points, increasing its Thrust by 3\"."
+        }
+    ],
+    "Upgrades": [
+        {
+            "Name": "Drive Augmentation",
+            "Cost": 35,
+            "Effects": [
+                {
+                    "Target": "Thrust",
+                    "Type": "add",
+                    "Value": 3
+                }
+            ]
+        }
+    ],
+    "KnownShips": [
+        "Inspiration",
+        "Forgeheart",
+        "Dreadcloud"
+    ],
+    "Flavour": "The Iron class supercarrier is a formidable vessel designed for lone surface incursions. While its conventional armament is minimal, its cavernous hold contains swarms of fighters, bombers, and rare Shaltari launch assets. Bulk landers give the aliens an atypical deployment method requiring no support vessels while advanced torpedoes obliterate any responders."
+}

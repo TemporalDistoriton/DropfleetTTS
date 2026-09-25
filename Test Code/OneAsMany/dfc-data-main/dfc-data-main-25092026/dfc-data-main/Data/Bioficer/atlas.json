@@ -1,0 +1,66 @@
+{
+    "Admiral": "Atlas",
+    "AdmiralLevel": 2,
+    "Class": "Catastrophe",
+    "Type": "Heavy Cruiser",
+    "AdmiralPoints": 45,
+    "ShipPoints": 110,
+    "Points": 155,
+    "Tonnage": "M",
+    "BaseSize": 40,
+    "Profile": {
+        "Thrust": 7,
+        "Scan": 8,
+        "Sig": 4,
+        "Hull": 9,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1",
+        "Special": [
+            "Porter S-1"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Heavy Lightvice",
+            "Arc": "F",
+            "Att": 5,
+            "Lock": "2+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Close Action",
+                "Focused"
+            ]
+        },
+        {
+            "Name": "Thermator",
+            "Arc": "F",
+            "Att": 3,
+            "Lock": "4+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Overcharge",
+                "Scald-1"
+            ]
+        }
+    ],
+    "Load": [],
+    "Rules": [
+        {
+            "Name": "One Upsmanship",
+            "Text": "If this Admiral is your highest level Admiral, whenever your opponent uses an Ability, roll a dice. On a 4+, you gain 1AP."
+        }
+    ],
+    "FleetAdmiralAbilities": 1,
+    "AdmiralAbilities": [
+        {
+            "Cost": "2AP",
+            "Name": "Emergency Reattachment Protocol",
+            "Effect": "When an enemy would destroy one of your Payload Ships, it is not destroyed and is instead reattached to a valid Porter Ship within 6\"."
+        }
+    ],
+    "Flavour": ""
+}

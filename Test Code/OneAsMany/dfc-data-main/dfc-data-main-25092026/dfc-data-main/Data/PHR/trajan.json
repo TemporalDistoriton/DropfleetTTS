@@ -1,0 +1,58 @@
+{
+    "Class": "Trajan",
+    "Type": "Battleship",
+    "Points": 220,
+    "Tonnage": "H",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 10,
+        "Scan": 10,
+        "Sig": 10,
+        "Hull": 22,
+        "ES": "3+",
+        "KS": "3+",
+        "BS": "5+",
+        "G": "1",
+        "Special": [
+            "Regenerate-2"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Black Nano Drones",
+            "Arc": "F/S/R",
+            "Att": 8,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Close Action",
+                "Penetrator"
+            ]
+        },
+        {
+            "Name": "Hornet Drone Cluster",
+            "Arc": "F/S/R",
+            "Att": 6,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Close Action"
+            ]
+        }
+    ],
+    "Load": [
+        {
+            "Load": "Fighters & Bombers",
+            "Launch": 4,
+            "Special": []
+        }
+    ],
+    "KnownShips": [
+        "Godhammer",
+        "Sphere's Benevolence",
+        "The Vizier"
+    ],
+    "Flavour": "The Trajan class battleship uses the same internal power structure as its cousin the Memnon, but this class is more overtly offensive and aggressive. Multiple attack drone and nanomachine systems make this giant lethal at close range while a sizable compliment of fighters and bombers can deploy in support or to strike at more distant targets."
+}

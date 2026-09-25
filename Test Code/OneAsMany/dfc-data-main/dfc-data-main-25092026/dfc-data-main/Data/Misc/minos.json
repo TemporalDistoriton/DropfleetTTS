@@ -1,0 +1,12 @@
+{
+    "Fleet": "PHR",
+    "Class": "Minos",
+    "Type": "Battleship",
+    "RuleName": "Counts As",
+    "RuleText": "This ship counts as a Minos Battleship.",
+    "KnownShips": [],
+    "Flavour": "",
+    "CountsAsClass": "Minos",
+    "CountsAsType": "Battleship",
+    "Availability": "RESIN"
+}

@@ -1,0 +1,25 @@
+{
+    "Name": "Medium Space Station",
+    "Type": "Orbital Hub",
+    "Points": 55,
+    "BaseSize": 40,
+    "Profile": {
+        "Scan": 6,
+        "Sig": 6,
+        "Hull": 15,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "-",
+        "G": "1",
+        "Special": []
+    },
+    "Hardpoints": {
+        "Armaments": 2,
+        "Features": 1
+    },
+    "MaxUpgrades": 1,
+    "UpgradeOptions": [
+        "Astrobotanical Lab",
+        "Defence Grid"
+    ]
+}

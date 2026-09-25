@@ -1,0 +1,37 @@
+{
+    "Class": "Cache",
+    "Type": "Light Cruiser",
+    "Points": 65,
+    "Tonnage": "M",
+    "BaseSize": 40,
+    "Profile": {
+        "Thrust": 10,
+        "Scan": 8,
+        "Sig": 2,
+        "Hull": 5,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "-",
+        "G": "1-3",
+        "Special": [
+            "Porter S-1"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Heavy Lightvice",
+            "Arc": "F",
+            "Att": 5,
+            "Lock": "2+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Close Action",
+                "Focused"
+            ]
+        }
+    ],
+    "Load": [],
+    "KnownShips": [],
+    "Flavour": ""
+}

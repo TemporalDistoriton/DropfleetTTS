@@ -1,0 +1,34 @@
+{
+    "Class": "Foray",
+    "Type": "Frigate",
+    "Points": 25,
+    "Tonnage": "L",
+    "BaseSize": 30,
+    "Profile": {
+        "Thrust": 14,
+        "Scan": 8,
+        "Sig": 1,
+        "Hull": 3,
+        "ES": "5+",
+        "KS": "5+",
+        "BS": "-",
+        "G": "1-2",
+        "Special": [
+            "Porter S-1"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Decon Burst",
+            "Arc": "F/S/R",
+            "Att": 1,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": []
+        }
+    ],
+    "Load": [],
+    "KnownShips": [],
+    "Flavour": ""
+}

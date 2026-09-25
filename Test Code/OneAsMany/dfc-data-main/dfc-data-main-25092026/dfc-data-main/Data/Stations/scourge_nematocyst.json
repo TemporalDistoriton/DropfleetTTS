@@ -1,0 +1,33 @@
+{
+    "Fleet": "Scourge",
+    "Name": "Nematocyst",
+    "Size": "Small",
+    "Points": 65,
+    "BaseSize": 30,
+    "Profile": {
+        "Scan": 12,
+        "Sig": 4,
+        "Hull": 8,
+        "ES": "3+",
+        "KS": "4+",
+        "BS": "-",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Volcano Lance",
+            "Arc": "F/S/R",
+            "Att": 3,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "E",
+            "Special": [
+                "Bloom-1",
+                "Burnthrough-1",
+                "Flash-1"
+            ]
+        }
+    ],
+    "Load": []
+}

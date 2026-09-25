@@ -1,0 +1,12 @@
+{
+    "Profile": {
+        "PTS": null,
+        "Type": "Scanner Tower",
+        "ES": "3+",
+        "KS": "5+",
+        "Special": []
+    },
+    "Weapons": [],
+    "Load": [],
+    "Rules": "When you activate this Feature, place two Spikes on any enemy Group in line of sight, then, place another two Spikes on any enemy Group in line of sight."
+}

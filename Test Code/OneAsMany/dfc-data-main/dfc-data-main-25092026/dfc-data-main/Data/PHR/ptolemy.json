@@ -1,0 +1,53 @@
+{
+    "Class": "Ptolemy",
+    "Type": "Supercruiser",
+    "Points": 174,
+    "Tonnage": "M",
+    "BaseSize": 50,
+    "Profile": {
+        "Thrust": 7,
+        "Scan": 8,
+        "Sig": 6,
+        "Hull": 14,
+        "ES": "3+",
+        "KS": "4+",
+        "BS": "6+",
+        "G": "1",
+        "Special": []
+    },
+    "Weapons": [
+        {
+            "Name": "Hornet Drone Locus",
+            "Arc": "F/S/R",
+            "Att": 8,
+            "Lock": "3+",
+            "DMG": 2,
+            "Type": "K",
+            "Special": [
+                "Close Action"
+            ]
+        },
+        {
+            "Name": "Light Calibre Double Broadside",
+            "Arc": "B",
+            "Att": 12,
+            "Lock": "5+",
+            "DMG": 1,
+            "Type": "K",
+            "Special": [
+                "Calibre-L",
+                "Re-Entry",
+                "Volley-2"
+            ]
+        }
+    ],
+    "Load": [],
+    "Rules": [
+        {
+            "Name": "Feature Carrier",
+            "Text": "At the start of the game, before players deploy, choose one Deployable Feature from the PHR Deployable Features List. This Ship starts the game carrying that Deployable Feature."
+        }
+    ],
+    "KnownShips": [],
+    "Flavour": ""
+}

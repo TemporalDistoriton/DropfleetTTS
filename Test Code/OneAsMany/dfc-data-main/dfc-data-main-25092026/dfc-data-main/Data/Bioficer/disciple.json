@@ -1,0 +1,34 @@
+{
+    "Class": "Disciple",
+    "Type": "Destroyer",
+    "Points": 55,
+    "Tonnage": "L",
+    "BaseSize": 30,
+    "Profile": {
+        "Thrust": 8,
+        "Scan": 8,
+        "Sig": 2,
+        "Hull": 5,
+        "ES": "4+",
+        "KS": "4+",
+        "BS": "5+",
+        "G": "1-3",
+        "Special": [
+            "Porter L-1"
+        ]
+    },
+    "Weapons": [
+        {
+            "Name": "Decon Blast",
+            "Arc": "F/S/R",
+            "Att": 4,
+            "Lock": "4+",
+            "DMG": 1,
+            "Type": "E",
+            "Special": []
+        }
+    ],
+    "Load": [],
+    "KnownShips": [],
+    "Flavour": ""
+}
