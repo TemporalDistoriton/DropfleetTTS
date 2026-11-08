@@ -3,7 +3,7 @@ Upgrade Card Generator
 ======================
 Reads UpgradeTemplate.pptx and Upgrades.xlsx from the same folder as this script.
 For each row in the Excel sheet, replaces placeholders in slide 1, exports as PNG,
-crops the white PowerPoint canvas margin, applies a faction colour tint, saves to ./output/
+crops the white PowerPoint canvas margin, applies a faction colour tint, saves to ./output/<FACTION>/Upgrades/ with unique filenames
 
 Excel columns required: Name, Effect, Ships, Points, Faction
 
@@ -51,6 +51,7 @@ FACTION_TINTS = {
     "shaltari":   (0.58,  0.325, 0.231),
     "ucm":        (0.341, 0.569, 0.337),
     "bioficers":  (0.58,  0.231, 0.231),
+    "bioficer":   (0.58,  0.231, 0.231),
     "civilian":   (0.231, 0.576, 0.58),
 }
 
@@ -69,7 +70,12 @@ def replace_text_in_shape(shape, old: str, new: str):
         return
     for para in shape.text_frame.paragraphs:
         for run in para.runs:
-            if old in run.text:
+            # PH_POINTS is simply "1" in the PowerPoint template. Do NOT
+            # replace other 1 digits in ship names, weapon stats or rules text.
+            if old == PH_POINTS:
+                if run.text.strip() == PH_POINTS:
+                    run.text = run.text.replace(PH_POINTS, new, 1)
+            elif old in run.text:
                 run.text = run.text.replace(old, new)
 
 
@@ -199,6 +205,25 @@ def sanitise_filename(name: str) -> str:
     return "".join(c if c in keep else "_" for c in name).strip()
 
 
+# Keep these naming rules in sync with GenerateUpgradeTTS.py.
+# Particularly important: every faction has a Minelayer, and Scourge has two.
+FACTION_FOLDERS = {
+    "ucm": "UCM", "phr": "PHR", "resistance": "Resistance",
+    "scourge": "Scourge", "shaltari": "Shaltari",
+    "bioficer": "Bioficer", "bioficers": "Bioficer",
+    "civilian": "Civilian",
+}
+
+
+def image_filename(name: str, faction: str, ships: str) -> str:
+    if name.strip().casefold() == "minelayer":
+        first_ship = ships.split(",", 1)[0].strip()
+        if not first_ship:
+            raise ValueError(f"Minelayer upgrade ({faction}) needs a ship name")
+        name = "Minelayer - " + first_ship
+    return sanitise_filename(name.strip()) + ".png"
+
+
 def main():
     script_dir    = os.path.dirname(os.path.abspath(__file__))
     template_path = os.path.join(script_dir, "UpgradeTemplate.pptx")
@@ -212,7 +237,7 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
 
     wb      = openpyxl.load_workbook(excel_path, data_only=True)
-    ws      = wb.active
+    ws      = wb["Sheet1"] if "Sheet1" in wb.sheetnames else wb.active
     headers = [str(c.value).strip() if c.value else "" for c in next(ws.iter_rows(min_row=1, max_row=1))]
 
     def col(row_vals, col_name: str) -> str:
@@ -225,6 +250,7 @@ def main():
     rows = [r for r in ws.iter_rows(min_row=2, values_only=True) if any(r)]
     print(f"Found {len(rows)} upgrade(s) to process.\n")
 
+    seen_outputs = set()
     for row_vals in rows:
         name    = col(row_vals, "Name")
         effect  = col(row_vals, "Effect")
@@ -237,6 +263,15 @@ def main():
             continue
 
         print(f"  Processing: {name}  [{faction}]")
+        if faction not in FACTION_FOLDERS:
+            raise ValueError(f"Unknown faction {faction!r} for {name}")
+        faction_dir = os.path.join(output_dir, FACTION_FOLDERS[faction], "Upgrades")
+        os.makedirs(faction_dir, exist_ok=True)
+        final_name = image_filename(name, faction, ships)
+        out_path = os.path.join(faction_dir, final_name)
+        if out_path.casefold() in seen_outputs:
+            raise ValueError(f"Duplicate PNG destination: {out_path}")
+        seen_outputs.add(out_path.casefold())
 
         prs   = Presentation(template_path)
         slide = prs.slides[0]
@@ -280,7 +315,6 @@ def main():
         # Make octagonal corners transparent
         img = make_corners_transparent(img)
 
-        out_path = os.path.join(output_dir, f"{sanitise_filename(name)}.png")
         img.save(out_path, "PNG")
         os.unlink(raw_png)
         print(f"    Saved -> {out_path}")
